@@ -1,0 +1,42 @@
+vinculacion-digital/
+├── frontend/                 # React (lo haremos primero)
+│   ├── src/
+│   │   ├── components/      # Componentes reutilizables
+│   │   ├── pages/           # Páginas principales
+│   │   ├── services/        # Llamadas a API Django
+│   │   └── utils/           # Helpers y validaciones
+│   └── package.json
+│
+└── backend/                  # Django (lo haremos después)
+    ├── vinculacion/         # App principal
+    │   ├── models.py        # Modelos de BD
+    │   ├── views.py         # API endpoints
+    │   ├── serializers.py   # Transformadores JSON
+    │   └── oracle_client.py # Conexión Oracle
+    └── manage.py
+
+#? El flag -p en mkdir crea los directorios necesarios, incluso si algunos ya existen.
+mkdir -p 
+#! Directorio para nuestros componentes
+src/components
+#! Directorio para nuestras páginas
+src/pages
+#! Directorio para servicios de API
+src/services
+#! Directorio para utilidades y helpers
+src/utils
+#? Creamos un archivo package.json vacío para trabajar con el frontend
+&& echo. > package.json
+
+#? Creamos la estructura básica del backend de Django
+mkdir vinculacion &&
+cd vinculacion &&
+#? Creamos archivos vacíos para los componentes principales de la app
+type nul > models.py &&
+type nul > views.py &&
+type nul > serializers.py &&
+type nul > oracle_client.py &&
+#? Volvemos al directorio backend para crear manage.py
+cd .. &&
+#? Creamos un archivo manage.py vacío para trabajar con el backend
+type nul > manage.py
