@@ -314,58 +314,62 @@ const VinculacionDigital = () => {
         onClose={() => setModal({ show: false, title: '', message: '' })}
       />
       <div className="max-w-4xl mx-auto">
-        
-        <div className="text-center mb-8">
-          <div className="flex justify-center mb-4">
-            <img src={logo} alt="Logo Congente" className="h-24" />
-          </div>
-          <h1 className="text-4xl font-bold" style={{ color: '#0d4974ff' }}>
-            Vinculación Digital
-          </h1>
-        </div>
 
-        <div className="mb-8">
-          <div className="flex justify-between items-center">
-            {[
-              { num: 1, titulo: 'Datos Básicos', icono: UserCheck },
-              { num: 2, titulo: 'Validación', icono: CheckCircle },
-              { num: 3, titulo: 'Formulario', icono: ExternalLink },
-              { num: 4, titulo: 'Verificación', icono: Building2 }
-            ].map(({ num, titulo, icono: Icon }) => (
-              <div key={num} className="flex flex-col items-center flex-1">
-                <div 
-                  className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 ${
-                    paso >= num 
-                      ? 'text-white shadow-lg' 
-                      : 'bg-gray-300 text-gray-600'
-                  }`}
-                  style={paso >= num ? { backgroundColor: '#0d4974ff' } : {}}
-                >
-                  <Icon className="w-6 h-6" />
-                </div>
-                <span className={`mt-2 text-xs font-medium ${
-                  paso >= num ? 'text-gray-700' : 'text-gray-500'
-                }`}>
-                  {titulo}
-                </span>
-              </div>
-            ))}
+        
+        <div className="mb-8 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+          <div className="text-center md:text-left">
+            <div className="flex justify-center md:justify-start mb-8">
+              <img src={logo} alt="Logo Congente" className="h-24" />
+            </div>
+            <h1 className="mt-3 text-4xl font-bold" style={{ color: '#0d4974ff' }}>
+              Vinculación Digital
+            </h1>
           </div>
-          <div className="relative mt-4">
-            <div className="h-2 bg-gray-300 rounded-full">
-              <div 
-                className="h-2 rounded-full transition-all duration-500"
-                style={{ 
-                  width: `${((paso - 1) / 3) * 100}%`,
-                  backgroundColor: '#D56911'
-                }}
-              />
+
+          <div className="w-full md:w-[420px] md:ml-auto">
+            <div className="flex justify-between items-center">
+              {[
+                { num: 1, titulo: 'Datos Básicos', icono: UserCheck },
+                { num: 2, titulo: 'Validación', icono: CheckCircle },
+                { num: 3, titulo: 'Formulario', icono: ExternalLink },
+                { num: 4, titulo: 'Verificación', icono: Building2 }
+              ].map(({ num, titulo, icono: Icon }) => (
+                <div key={num} className="flex flex-col items-center flex-1">
+                  <div 
+                    className={`w-12 h-12 rounded-full flex items-center justify-center transition-all duration-300 ${
+                      paso >= num 
+                        ? 'text-white shadow-lg' 
+                        : 'bg-gray-300 text-gray-600'
+                    }`}
+                    style={paso >= num ? { backgroundColor: '#0d4974ff' } : {}}
+                  >
+                    <Icon className="w-6 h-6" />
+                  </div>
+                  <span className={`mt-2 text-xs font-medium ${
+                    paso >= num ? 'text-gray-700' : 'text-gray-500'
+                  }`}>
+                    {titulo}
+                  </span>
+                </div>
+              ))}
+            </div>
+            <div className="relative mt-4">
+              <div className="h-2 bg-gray-300 rounded-full">
+                <div 
+                  className="h-2 rounded-full transition-all duration-500"
+                  style={{ 
+                    width: `${((paso - 1) / 3) * 100}%`,
+                    backgroundColor: '#D56911'
+                  }}
+                />
+              </div>
             </div>
           </div>
         </div>
 
         <div className="bg-white rounded-lg shadow-xl p-8">
 
+          
           {paso === 1 && (
             <div>
               <h2 className="text-2xl font-bold text-gray-900 mb-6" style={{ color: '#0d4974ff' }}>
@@ -435,26 +439,26 @@ const VinculacionDigital = () => {
                       ))}
                     </select>
                   </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      ¿En qué agencia te gustaría inscribirte? *
-                    </label>
-                    <select
-                      required
-                      value={datosBasicos.agencia}
-                      onChange={(e) => actualizarDatosBasicos('agencia', e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
-                    >
-                      <option value="">-- Selecciona una agencia --</option>
-                      {AGENCIAS_DISPONIBLES.map(agencia => (
-                        <option key={agencia.key} value={agencia.key}>
-                          {agencia.nombre}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
                 </div>
+              </div>
+
+              <div className="mt-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  ¿En qué agencia te gustaría inscribirte? *
+                </label>
+                <select
+                  required
+                  value={datosBasicos.agencia}
+                  onChange={(e) => actualizarDatosBasicos('agencia', e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
+                >
+                  <option value="">-- Selecciona una agencia --</option>
+                  {AGENCIAS_DISPONIBLES.map(agencia => (
+                    <option key={agencia.key} value={agencia.key}>
+                      {agencia.nombre}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <button
@@ -475,7 +479,7 @@ const VinculacionDigital = () => {
             </div>
           )}
 
-          {paso === 2 && (
+{paso === 2 && (
             <div className="text-center py-12">
               <h2 className="text-2xl font-bold text-gray-900 mb-4" style={{ color: '#0d4974ff' }}>
                 Validación de Identidad

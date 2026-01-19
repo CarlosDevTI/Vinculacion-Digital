@@ -19,6 +19,11 @@ from rest_framework.permissions import AllowAny
 from django.conf import settings
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+import base64
+import hashlib
+import hmac
+import json
+import time
 import logging
 
 from .models import PreRegistro, LogIntegracion
@@ -32,6 +37,57 @@ from .services import BiometriaService, LinixService
 
 # Configurar logger
 logger = logging.getLogger(__name__)
+
+
+def _b64url_encode(data):
+    return base64.urlsafe_b64encode(data).rstrip(b'=').decode('ascii')
+
+
+def _b64url_decode(data):
+    data_bytes = data.encode('ascii') if isinstance(data, str) else data
+    padding = b'=' * (-len(data_bytes) % 4)
+    return base64.urlsafe_b64decode(data_bytes + padding)
+
+
+def _jwt_sign(payload, secret):
+    header = {"alg": "HS256", "typ": "JWT"}
+    header_b64 = _b64url_encode(
+        json.dumps(header, separators=(',', ':')).encode('utf-8')
+    )
+    payload_b64 = _b64url_encode(
+        json.dumps(payload, separators=(',', ':')).encode('utf-8')
+    )
+    signing_input = f"{header_b64}.{payload_b64}".encode('utf-8')
+    signature = hmac.new(secret.encode('utf-8'), signing_input, hashlib.sha256).digest()
+    return f"{header_b64}.{payload_b64}.{_b64url_encode(signature)}"
+
+
+def _jwt_verify(token, secret):
+    try:
+        header_b64, payload_b64, signature_b64 = token.split('.')
+        signing_input = f"{header_b64}.{payload_b64}".encode('utf-8')
+        expected_sig = hmac.new(
+            secret.encode('utf-8'),
+            signing_input,
+            hashlib.sha256
+        ).digest()
+        if not hmac.compare_digest(_b64url_encode(expected_sig), signature_b64):
+            return None
+        payload_raw = _b64url_decode(payload_b64).decode('utf-8')
+        payload = json.loads(payload_raw)
+        exp = payload.get('exp')
+        if exp and int(exp) < int(time.time()):
+            return None
+        return payload
+    except Exception:
+        return None
+
+
+def _get_client_ip(request):
+    forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if forwarded_for:
+        return forwarded_for.split(',')[0].strip()
+    return request.META.get('REMOTE_ADDR')
 
 
 class IniciarPreRegistroView(APIView):
@@ -244,7 +300,10 @@ class EstadoBiometriaView(APIView):
         
         # Consultar API del proveedor
         biometria_service = BiometriaService()
-        resultado = biometria_service.consultar_caso_por_dni(preregistro.numero_cedula)
+        resultado = biometria_service.consultar_caso_por_dni(
+            preregistro.numero_cedula,
+            preregistro.idcaso_biometria
+        )
         
         # Crear log de la integración
         log = LogIntegracion.objects.create(
@@ -295,7 +354,12 @@ class EstadoBiometriaView(APIView):
             error_msg = resultado.get('error', 'Error desconocido')
             
             # Si el caso no se encuentra, es normal (aún no ha validado)
-            if resultado.get('estado') == 'NO_ENCONTRADO':
+            if resultado.get('estado') in ['NO_ENCONTRADO', 'EN_PROCESO']:
+                logger.info(
+                    "Consulta biometria sin resultado final (%s): %s",
+                    resultado.get('estado'),
+                    preregistro.numero_cedula
+                )
                 # Actualizar estado a EN_PROCESO si estaba PENDIENTE
                 if preregistro.estado_biometria == PreRegistro.BIOMETRIA_PENDIENTE:
                     preregistro.estado_biometria = PreRegistro.BIOMETRIA_EN_PROCESO
@@ -307,6 +371,17 @@ class EstadoBiometriaView(APIView):
                     'justificacion': '',
                     'mensaje': 'Esperando validación biométrica. Por favor completa el proceso en la ventana del proveedor.'
                 })
+
+            if resultado.get('estado') == 'NO_AUTORIZADO':
+                logger.warning(
+                    "Consulta biometria no autorizada para entidad: %s",
+                    preregistro.numero_cedula
+                )
+                return Response(
+                    {'error': error_msg},
+                    status=status.HTTP_502_BAD_GATEWAY
+                )
+
             
             # Cualquier otro error
             logger.error(f"Error consultando biometría: {error_msg}")
@@ -318,6 +393,156 @@ class EstadoBiometriaView(APIView):
                 },
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+
+class DecrimTokenView(APIView):
+    """
+    POST /api/v1/decrim/token/
+
+    Genera un token JWT para autenticar el webhook de DECRIM.
+    """
+
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        user = request.data.get('user')
+        password = request.data.get('password')
+
+        expected_user = getattr(settings, 'DECRIM_WEBHOOK_USER', '')
+        expected_password = getattr(settings, 'DECRIM_WEBHOOK_PASSWORD', '')
+        secret = getattr(settings, 'DECRIM_WEBHOOK_JWT_SECRET', '')
+        ttl = getattr(settings, 'DECRIM_WEBHOOK_TOKEN_TTL', 300)
+
+        if not expected_user or not expected_password or not secret:
+            return Response(
+                {'error': 'Webhook credentials not configured'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+        if not user or not password:
+            return Response(
+                {'error': 'Missing credentials'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if user != expected_user or password != expected_password:
+            return Response(
+                {'error': 'Unauthorized'},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+
+        now = int(time.time())
+        token = _jwt_sign(
+            {
+                'sub': user,
+                'iat': now,
+                'exp': now + int(ttl)
+            },
+            secret
+        )
+
+        return Response({'token': token})
+
+
+class DecrimWebhookView(APIView):
+    """
+    POST /api/v1/decrim/webhook/
+
+    Recibe resultados de validacion en tiempo real desde DECRIM.
+    """
+
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        secret = getattr(settings, 'DECRIM_WEBHOOK_JWT_SECRET', '')
+        if not secret:
+            return Response(
+                {'status': '500', 'message': 'Webhook secret not configured'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+        whitelist = getattr(settings, 'DECRIM_WEBHOOK_IP_WHITELIST', [])
+        if whitelist:
+            client_ip = _get_client_ip(request)
+            if client_ip not in whitelist:
+                logger.warning("Webhook rechazado por IP no permitida: %s", client_ip)
+                return Response(
+                    {'status': '403', 'message': 'Forbidden'},
+                    status=status.HTTP_403_FORBIDDEN
+                )
+
+        auth_header = request.headers.get('Authorization', '')
+        if not auth_header.startswith('Bearer '):
+            return Response(
+                {'status': '401', 'message': 'Unauthorized'},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+
+        token = auth_header.split(' ', 1)[1].strip()
+        if not _jwt_verify(token, secret):
+            return Response(
+                {'status': '401', 'message': 'Unauthorized'},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+
+        data = request.data or {}
+        idcaso = data.get('Idcaso')
+        dni = data.get('Dni')
+        estado = data.get('Estado')
+        justificacion = data.get('Justificacion', '')
+
+        if not idcaso and not dni:
+            return Response(
+                {'status': '400', 'message': 'Idcaso o Dni requerido'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        preregistro = None
+        if idcaso:
+            preregistro = (
+                PreRegistro.objects
+                .filter(idcaso_biometria=str(idcaso))
+                .order_by('-created_at')
+                .first()
+            )
+
+        if not preregistro and dni:
+            preregistro = (
+                PreRegistro.objects
+                .filter(numero_cedula=str(dni))
+                .order_by('-created_at')
+                .first()
+            )
+
+        if not preregistro:
+            return Response(
+                {
+                    'status': '404',
+                    'message': f'Caso ID {idcaso or dni} no encontrado.'
+                },
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        biometria_service = BiometriaService()
+        estado_normalizado, descripcion = biometria_service.interpretar_estado(estado)
+        preregistro.estado_biometria = estado_normalizado
+        if idcaso:
+            preregistro.idcaso_biometria = str(idcaso)
+        if justificacion:
+            preregistro.justificacion_biometria = justificacion
+
+        if estado_normalizado == PreRegistro.BIOMETRIA_APROBADO:
+            preregistro.fecha_validacion_biometria = timezone.now()
+            preregistro.estado_vinculacion = PreRegistro.ESTADO_BIOMETRIA_OK
+
+        preregistro.save()
+
+        return Response(
+            {
+                'status': '200',
+                'message': f'Caso ID {preregistro.idcaso_biometria} recibido y almacenado con exito.'
+            }
+        )
 
 
 class LinkLinixView(APIView):

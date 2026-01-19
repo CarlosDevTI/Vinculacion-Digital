@@ -6,10 +6,13 @@ URLS - Configuración de rutas de la API
 Define los endpoints disponibles y los asocia con sus views.
 """
 
+from django.conf import settings
 from django.urls import path
 from .views import (
     IniciarPreRegistroView,
     EstadoBiometriaView,
+    DecrimTokenView,
+    DecrimWebhookView,
     LinkLinixView,
     VerificarLinixView,
     PreRegistroDetailView,
@@ -54,11 +57,27 @@ urlpatterns = [
         PreRegistroDetailView.as_view(),
         name='preregistro-detail'
     ),
-    
-    # Testing (remover en producción)
+
+    # Webhook DECRIM
     path(
-        'test/oracle/',
-        TestOracleConnectionView.as_view(),
-        name='test-oracle'
+        'decrim/token/',
+        DecrimTokenView.as_view(),
+        name='decrim-token'
     ),
+    path(
+        'decrim/webhook/',
+        DecrimWebhookView.as_view(),
+        name='decrim-webhook'
+    ),
+    
 ]
+
+if settings.DEBUG:
+    # Testing (solo en desarrollo)
+    urlpatterns.append(
+        path(
+            'test/oracle/',
+            TestOracleConnectionView.as_view(),
+            name='test-oracle'
+        )
+    )

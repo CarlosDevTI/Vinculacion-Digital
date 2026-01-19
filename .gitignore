@@ -47,3 +47,5 @@ dist-ssr
 # Migrations cache
 __pycache__/
 *.pyc
+
+backend/.env.example

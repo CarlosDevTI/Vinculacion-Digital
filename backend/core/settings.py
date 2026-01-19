@@ -53,10 +53,31 @@ LOGGING = {
 }
 
 N8N_WEBHOOK_URL = os.environ.get('N8N_WEBHOOK_URL', '')
+DECRIM_ENV = os.environ.get('DECRIM_ENV', 'qa').lower()
 DECRIM_API_URL = os.environ.get(
     'DECRIM_API_URL',
     'https://consultorid.com/api/digital/crear/registro.php'
 )
+_decrim_consulta_default_url = (
+    'https://dev.consultorid.com/api/validacion/consultar/caso.php'
+    if DECRIM_ENV == 'qa'
+    else 'https://consultorid.com/api/validacion/consultar/caso.php'
+)
+DECRIM_CONSULTA_URL = os.environ.get(
+    'DECRIM_CONSULTA_URL',
+    _decrim_consulta_default_url
+)
+DECRIM_CONSULTA_CANAL = os.environ.get('DECRIM_CONSULTA_CANAL', '0')
+DECRIM_CONSULTA_CERTIFICADO = os.environ.get('DECRIM_CONSULTA_CERTIFICADO', '0')
+DECRIM_WEBHOOK_USER = os.environ.get('DECRIM_WEBHOOK_USER', '')
+DECRIM_WEBHOOK_PASSWORD = os.environ.get('DECRIM_WEBHOOK_PASSWORD', '')
+DECRIM_WEBHOOK_JWT_SECRET = os.environ.get('DECRIM_WEBHOOK_JWT_SECRET', '')
+DECRIM_WEBHOOK_TOKEN_TTL = int(os.environ.get('DECRIM_WEBHOOK_TOKEN_TTL', '300'))
+DECRIM_WEBHOOK_IP_WHITELIST = [
+    ip.strip()
+    for ip in os.environ.get('DECRIM_WEBHOOK_IP_WHITELIST', '').split(',')
+    if ip.strip()
+]
 DECRIM_USERNAME = os.environ.get(
     'DECRIM_USERNAME',
     os.environ.get('USER_DECRIM', os.environ.get('NAME_DECRIM', ''))

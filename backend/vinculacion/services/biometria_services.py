@@ -7,10 +7,11 @@ Maneja toda la comunicación con la API del proveedor
 para consultar el estado de validación de identidad.
 """
 
-import requests
 import logging
+import time
+
+import requests
 from django.conf import settings
-from datetime import datetime
 
 # Configurar logger para este módulo
 logger = logging.getLogger(__name__)
@@ -38,21 +39,141 @@ class BiometriaService:
         )
         self.username = getattr(settings, 'DECRIM_USERNAME', '')
         self.password = getattr(settings, 'DECRIM_PASSWORD', '')
+        self.consulta_url = getattr(
+            settings,
+            'DECRIM_CONSULTA_URL',
+            'https://consultorid.com/api/validacion/consultar/caso.php'
+        )
+        self.consulta_canal = getattr(settings, 'DECRIM_CONSULTA_CANAL', '0')
+        self.consulta_certificado = getattr(settings, 'DECRIM_CONSULTA_CERTIFICADO', '0')
         
         # Timeout para las peticiones (segundos)
         self.timeout = 30
     
-    def consultar_caso_por_dni(self, numero_cedula):
+    def consultar_caso_por_dni(
+        self,
+        numero_cedula,
+        idcaso=None,
+        incluir_imagenes=False,
+        incluir_certificado=None
+    ):
         """
-        Consulta el estado de validacion de un caso por numero de DNI.
+        Consulta el estado de validacion de un caso por numero de DNI o Idcaso.
         """
-        logger.info("Consulta biometria desactivada hasta habilitar callback de DECRIM.")
-        return {
-            'exitoso': False,
-            'estado': 'NO_ENCONTRADO',
-            'error': 'Validacion pendiente: espera la respuesta de DECRIM',
-            'tiempo_respuesta_ms': 0
+        certificado_valor = self.consulta_certificado if incluir_certificado is None else (
+            "1" if incluir_certificado else "0"
+        )
+        if idcaso:
+            idcaso_value = str(idcaso)
+            dni_value = "0"
+        else:
+            idcaso_value = "0"
+            dni_value = str(numero_cedula or "0")
+        payload = {
+            "Username": self.username,
+            "Password": self.password,
+            "Idcaso": idcaso_value,
+            "Dni": dni_value,
+            "Canal": str(self.consulta_canal),
+            "Imagenes": "1" if incluir_imagenes else "0",
+            "Certificado": str(certificado_valor)
         }
+
+        start_time = time.monotonic()
+        try:
+            response = requests.post(
+                self.consulta_url,
+                json=payload,
+                headers={
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                timeout=self.timeout
+            )
+            elapsed_ms = int((time.monotonic() - start_time) * 1000)
+            data = response.json() if response.content else {}
+
+            if response.status_code == 200 and data.get('status') == 200:
+                data_payload = data.get('data', {})
+                return {
+                    'exitoso': True,
+                    'estado': data_payload.get('Estado'),
+                    'idcaso': data_payload.get('Idcaso'),
+                    'justificacion': data_payload.get('Justificacion', ''),
+                    'datos_completos': data,
+                    'request_data': payload,
+                    'tiempo_respuesta_ms': elapsed_ms
+                }
+
+            if response.status_code == 404 or data.get('status') == 404:
+                logger.info("Caso no encontrado en DECRIM: %s", payload)
+                return {
+                    'exitoso': False,
+                    'estado': 'NO_ENCONTRADO',
+                    'error': data.get('message', 'Caso no encontrado'),
+                    'datos_completos': data,
+                    'request_data': payload,
+                    'tiempo_respuesta_ms': elapsed_ms
+                }
+
+            if response.status_code == 409 or data.get('status') == 409:
+                logger.info("Caso en proceso en DECRIM (409): %s", payload)
+                return {
+                    'exitoso': False,
+                    'estado': 'EN_PROCESO',
+                    'error': data.get('message', 'Caso aun no disponible'),
+                    'datos_completos': data,
+                    'request_data': payload,
+                    'tiempo_respuesta_ms': elapsed_ms
+                }
+
+            if response.status_code == 403 or data.get('status') == 403:
+                logger.warning("Caso no autorizado para entidad en DECRIM: %s", payload)
+                return {
+                    'exitoso': False,
+                    'estado': 'NO_AUTORIZADO',
+                    'error': data.get('message', 'Caso no pertenece a la entidad'),
+                    'datos_completos': data,
+                    'request_data': payload,
+                    'tiempo_respuesta_ms': elapsed_ms
+                }
+
+            return {
+                'exitoso': False,
+                'error': data.get('message') if isinstance(data, dict) else None
+                or f'Error del proveedor: {response.status_code}',
+                'datos_completos': data,
+                'request_data': payload,
+                'tiempo_respuesta_ms': elapsed_ms
+            }
+
+        except requests.exceptions.Timeout:
+            elapsed_ms = int((time.monotonic() - start_time) * 1000)
+            return {
+                'exitoso': False,
+                'error': 'Timeout: El proveedor no respondio a tiempo',
+                'request_data': payload,
+                'tiempo_respuesta_ms': elapsed_ms
+            }
+
+        except requests.exceptions.ConnectionError:
+            elapsed_ms = int((time.monotonic() - start_time) * 1000)
+            return {
+                'exitoso': False,
+                'error': 'No se pudo conectar con el proveedor de validacion',
+                'request_data': payload,
+                'tiempo_respuesta_ms': elapsed_ms
+            }
+
+        except Exception as e:
+            logger.exception(f"Error inesperado consultando caso en DECRIM: {str(e)}")
+            elapsed_ms = int((time.monotonic() - start_time) * 1000)
+            return {
+                'exitoso': False,
+                'error': f'Error inesperado: {str(e)}',
+                'request_data': payload,
+                'tiempo_respuesta_ms': elapsed_ms
+            }
 
     def interpretar_estado(self, estado_codigo):
         """
@@ -70,15 +191,16 @@ class BiometriaService:
         
         estado_map = {
             '5': ('APROBADO', 'Validación biométrica exitosa'),
-            '1': ('EN_PROCESO', 'Validación en proceso'),
+            '3': ('RECHAZADO', 'Devuelto'),
             '2': ('RECHAZADO', 'Validación rechazada'),
-            # Agregar más estados según documentación
+            '1': ('APROBADO', 'Validado'),
         }
-        
-        return estado_map.get(
-            str(estado_codigo), 
-            ('EN_PROCESO', 'Estado desconocido')
-        )
+
+        estado = estado_map.get(str(estado_codigo))
+        if not estado:
+            logger.warning("Estado biometria desconocido: %s", estado_codigo)
+            return ('EN_PROCESO', 'Estado desconocido')
+        return estado
 
     def crear_registro_decrim(self, numero_cedula, tipo_documento, nombres):
         """

@@ -1,0 +1,192 @@
+  
+ 
+ 
+Página 1 de 5 
+ 
+ 
+DECRIM LAWYERS GROUP S.A.S.  
+NIT. 901.080.578 -5 
+ 
+Carrera 14 # 106 - 86 / Bogotá D.C. / Colombia  
+(+57) 315-9535031             (+57) 313 -8875622  
+comercial@decrimlg.com  
+Documentación Técnica — Webhook de Respuestas en Tiempo Real  
+Descripción general  
+El Webhook de Respuestas en Tiempo Real  permite que el sistema de Decrim LG envíe 
+automáticamente las respuestas o resultados de validación a un  siste ma esp ecifico  en el mismo 
+momento en el que se generan.  
+Se deberá proporcionar un endpoint HTTPS  (URL receptora) y las credenciales de acceso  necesarias 
+(usuario y contraseña) para poder recibir las notificaciones autenticadas.  
+ 
+ 1. Autenticación con JWT  
+El sistema utiliza autenticación JWT (JSON Web Token)  para proteger todas las peticiones.  
+Antes de recibir una respuesta en tiempo real, se debe implementar un endpoint de autenticación  que 
+reciba las credenciales y devuelva un token válido.  
+ 
+Solicitud de Token  
+Método:  POST  
+Endpoint:  /token  
+Content -Type:  application/json  
+Ejemplo de request:  
+{ 
+  "user" : "nombre_usuario" , 
+  "password" : "ContraseñaSegura123!"  
+} 
+ Requisitos del campo password  
+• Mínimo 8 caracteres  
+• Debe incluir al menos:  
+o Una letra mayúscula  
+o Un número  
+o Un símbolo  (por ejemplo: @, !, #, $, %) 
+ 
+ 
+ 
+  
+ 
+ 
+Página 2 de 5 
+ 
+ 
+DECRIM LAWYERS GROUP S.A.S.  
+NIT. 901.080.578 -5 
+ 
+Carrera 14 # 106 - 86 / Bogotá D.C. / Colombia  
+(+57) 315-9535031             (+57) 313 -8875622  
+comercial@decrimlg.com  
+ 
+Respuesta esperada  
+{ 
+  "token" : "<TOKEN_JWT>"  
+} 
+El token  debe tener  validez temporal y se enviara  en la cabecera Authorization  de todas las peticiones 
+posteriores.  
+El token  se generara cada vez que se genere y envíe  una respuesta en tiempo  real 
+ 
+2. Envío de datos del caso (Webhook principal)  
+Cuando DECRIM  genera una respuesta de caso, se envía una petición POST  al endpoint proporcionado.  
+ 
+Request  
+Método:  POST  
+URL (ejemplo):  https://tuservidor.com/api/recibir -respuesta  
+Headers:  
+Content -Type : application/ json 
+Authorization : Bearer <TOKEN_JWT>  
+Body (JSON):  
+{ 
+  "Idcaso" : 12345 , 
+  "Canal" : 1, 
+  "NombreCanal" : "Web" , 
+  "Entidad" : "Producto" , 
+  "FechaEnvio" : "2025 -10-27 15:07:25" , 
+  "Nombres" : "Juan Pérez García" , 
+  "Dni" : "123456789" , 
+  "TipoDni" : 1, 
+  "NombreTipoDni" : "Cédula de ciudadanía" , 
+  "Estado" : 3, 
+  
+ 
+ 
+Página 3 de 5 
+ 
+ 
+DECRIM LAWYERS GROUP S.A.S.  
+NIT. 901.080.578 -5 
+ 
+Carrera 14 # 106 - 86 / Bogotá D.C. / Colombia  
+(+57) 315-9535031             (+57) 313 -8875622  
+comercial@decrimlg.com  
+  "NombreEstado" : "Devuelto" , 
+  "Justificacion" : "X20. Caso replicado - N06. No es posible validar identidad del titular"  
+} 
+ 
+Respuesta esperada del cliente  
+El endpoint del cliente debe responder confirmando la recepción y almacenamiento exitoso del caso.  
+Ejemplo de respuesta:  
+{ 
+  "status" : "200" , 
+  "message" : "Caso ID 12345 recibido y almacenado con éxito."  
+} 
+En caso de error:  
+{ 
+  "status" : "400" , 
+  "message" : "Error al procesar el caso ID 12345."  
+} 
+ 
+3. Resumen de flujo de integración  
+Paso  Acción  Realiza  Descripción  
+1 Solicitud de Token   API se obtiene un token JWT enviando usuario y contraseña.  
+2 Validación del Token  API La API valida el token antes de cada envío.  
+3 Envío del caso  API → Cliente  Decrim  envía la respuesta del caso en tiempo real al endpoint . 
+4 Confirmación  Cliente → API  El cliente responde confirmando la recepción exitosa.  
+ 
+ 
+4. Recomendaciones técnicas  
+• Protocolo HTTPS obligatorio.  
+No se permiten endpoints sin SSL.  
+  
+ 
+ 
+Página 4 de 5 
+ 
+ 
+DECRIM LAWYERS GROUP S.A.S.  
+NIT. 901.080.578 -5 
+ 
+Carrera 14 # 106 - 86 / Bogotá D.C. / Colombia  
+(+57) 315-9535031             (+57) 313 -8875622  
+comercial@decrimlg.com  
+• Tiempo de respuesta máximo:  5 segundos.  
+Si no se recibe una respuesta HTTP 200 OK , el sistema puede reintentar el envío.  
+• Formato de contenido:  application/json  únicamente.  
+• Seguridad adicional (opcional):  
+Se recomienda validar el encabezado Authorization  con el token JWT y/o la dirección IP de 
+origen.  (whitelist ) 
+ 
+5. Ejemplo completo de flujo  
+Paso 1 – Autenticación  
+POST https://api. dominio .com/token  
+{ 
+  "user": "EntidadCliente" , 
+  "password" : "MiPassword123!"  
+} 
+→ Respuesta:  
+{ 
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6..."  
+} 
+Paso 2 – Recepción de datos  
+POST https:// dominio .com/api/recibir -respuesta  
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6...  
+Content -Type: application/json  
+{ 
+  "Idcaso": 12345 , 
+  "Canal" : 2, 
+  "NombreCanal" : "Enrolamiento" , 
+  "Entidad" : "MiEntidad" , 
+  "FechaEnvio" : "2025 -11-05 08:30:00" , 
+  "Nombres" : "Laura Gómez Rivas" , 
+  "Dni" : "987654321" , 
+  
+ 
+ 
+Página 5 de 5 
+ 
+ 
+DECRIM LAWYERS GROUP S.A.S.  
+NIT. 901.080.578 -5 
+ 
+Carrera 14 # 106 - 86 / Bogotá D.C. / Colombia  
+(+57) 315-9535031             (+57) 313 -8875622  
+comercial@decrimlg.com  
+  "TipoDni" : 1, 
+  "NombreTipoDni" : "Cédula de ciudadanía" , 
+  "Estado" : 1, 
+  "NombreEstado" : "Validado" , 
+  "Justificacion" : "Validación exitosa con biometría facial"  
+} 
+→ Respuesta del cliente:  
+{ 
+  "status": "200" , 
+  "message" : "Caso ID 12345 recibido correctamente."  
+} 
+ 
+ 
