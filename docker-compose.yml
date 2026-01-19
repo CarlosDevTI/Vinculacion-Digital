@@ -47,8 +47,7 @@ services:
       - ./deploy/nginx/vinculaciondigital.conf:/etc/nginx/conf.d/default.conf:ro
       - gunicorn-sock:/opt/VinculacionDigital
       - staticfiles:/opt/VinculacionDigital/static:ro
-      # Monta tus certificados reales de Let's Encrypt en el host
-      - /etc/letsencrypt:/etc/letsencrypt:ro
+
 
   frontend:
     build:
