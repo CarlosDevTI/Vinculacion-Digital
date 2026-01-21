@@ -1,16 +1,19 @@
-{
-  "name": "Vinculación Digital - Notificación a Agencia v2",
+﻿{
+  "name": "Vinculacion Digital - Verificacion LINIX Programada",
   "nodes": [
     {
       "parameters": {
-        "httpMethod": "POST",
-        "path": "vinculacion-completada",
-        "responseMode": "responseNode",
-        "options": {}
+        "triggerTimes": [
+          {
+            "mode": "everyX",
+            "value": 10,
+            "unit": "minutes"
+          }
+        ]
       },
-      "id": "webhook-trigger",
-      "name": "Webhook: Vinculación Completada",
-      "type": "n8n-nodes-base.webhook",
+      "id": "cron-trigger",
+      "name": "Cron: Verificar LINIX",
+      "type": "n8n-nodes-base.cron",
       "typeVersion": 1,
       "position": [
         250,
@@ -19,11 +22,15 @@
     },
     {
       "parameters": {
-        "functionCode": "/* 1. Diccionario de Agencias y Correos */\n/* IMPORTANTE: Este es el diccionario que debes mantener actualizado. */\nconst correosAgencias = {\n  \"PRINCIPAL\": \"agencia.principal@congente.coop\",\n  \"POPULAR\": \"agencia.popular@congente.coop\",\n  \"MONTECARLO\": \"agencia.montecarlo@congente.coop\",\n  \"PORFIA\": \"agencia.porfia@congente.coop\",\n  \"CATAMA\": \"agencia.catama@congente.coop\",\n  \"ACACIAS\": \"agencia.acacias@congente.coop\",\n  \"GRANADA\": \"agencia.granada@congente.coop\",\n  \"GUAYABETAL\": \"agencia.guayabetal@congente.coop\",\n  \"BARRANCA\": \"agencia.barranca@congente.coop\",\n  \"PUERTO_GAITAN\": \"agencia.puertogaitan@congente.coop\",\n  \"CABUYARO\": \"agencia.cabuyaro@congente.coop\",\n  \"VISTAHERMOSA\": \"agencia.vistahermosa@congente.coop\",\n  \"PUERTO_LOPEZ\": \"ase.comercial-01.puertolopez@congente.coop\",\n  \"EL_CASTILLO\": \"ase.comercial-01.castillo@congente.coop\",\n  \"CUMARAL\": \"ase.comercial-01.cumaral@congente.coop\",\n  \"LEJANIAS\": \"ase.comercial-01.lejanias@congente.coop\",\n  \"MESETAS\": \"ase.comercial-01.mesetas@congente.coop\",\n  \"PUERTO_RICO\": \"ase.comercial-01.puertorico@congente.coop\",\n  \"PUERTO_LLERAS\": \"ase.comercial-01.puertolleras@congente.coop\",\n  \"URIBE\": \"ase.comercial-01.uribe@congente.coop\",\n  \"YOPAL\": \"ase.comercial-01.yopal@congente.coop\",\n  \"VILLANUEVA\": \"ase.comercial-01.villanueva@congente.coop\",\n  \"default\": \"congente.tecnologia@congente.coop\"\n};\n\n/* 2. Obtener datos del webhook */\nconst body = $json.body;\n// Limpia y normaliza el input de agencia para que coincida con las llaves\nconst agencia = (body.agencia || \"\").trim().toUpperCase().replace(/\\s+/g, \"_\");\n\n/* 3. Buscar el correo */\nconst emailDestino = correosAgencias[agencia] || correosAgencias.default;\n\n/* 4. Añadir el correo al flujo para que el siguiente nodo lo use */\n$item.email_agencia = emailDestino;\n\n/* 5. Retornar el item para que el flujo continúe */\nreturn $item;\n"
+        "requestMethod": "POST",
+        "url": "https://consulta.congente.coop:8040/api/v1/linix/verificar-pendientes/",
+        "jsonParameters": true,
+        "options": {},
+        "bodyParametersJson": "{\"limit\": 100}"
       },
-      "id": "function-map-email",
-      "name": "Buscar Email de Agencia",
-      "type": "n8n-nodes-base.function",
+      "id": "http-verificar-linix",
+      "name": "HTTP: Verificar LINIX",
+      "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 1,
       "position": [
         500,
@@ -32,10 +39,23 @@
     },
     {
       "parameters": {
+        "functionCode": "/* 1. Diccionario de Agencias y Correos */\n/* IMPORTANTE: Este es el diccionario que debes mantener actualizado. */\nconst correosAgencias = {\n  \"PRINCIPAL\": \"agencia.principal@congente.coop\",\n  \"POPULAR\": \"agencia.popular@congente.coop\",\n  \"MONTECARLO\": \"agencia.montecarlo@congente.coop\",\n  \"PORFIA\": \"agencia.porfia@congente.coop\",\n  \"CATAMA\": \"agencia.catama@congente.coop\",\n  \"ACACIAS\": \"agencia.acacias@congente.coop\",\n  \"GRANADA\": \"agencia.granada@congente.coop\",\n  \"GUAYABETAL\": \"agencia.guayabetal@congente.coop\",\n  \"BARRANCA\": \"agencia.barranca@congente.coop\",\n  \"PUERTO_GAITAN\": \"agencia.puertogaitan@congente.coop\",\n  \"CABUYARO\": \"agencia.cabuyaro@congente.coop\",\n  \"VISTAHERMOSA\": \"agencia.vistahermosa@congente.coop\",\n  \"PUERTO_LOPEZ\": \"ase.comercial-01.puertolopez@congente.coop\",\n  \"EL_CASTILLO\": \"ase.comercial-01.castillo@congente.coop\",\n  \"CUMARAL\": \"ase.comercial-01.cumaral@congente.coop\",\n  \"LEJANIAS\": \"ase.comercial-01.lejanias@congente.coop\",\n  \"MESETAS\": \"ase.comercial-01.mesetas@congente.coop\",\n  \"PUERTO_RICO\": \"ase.comercial-01.puertorico@congente.coop\",\n  \"PUERTO_LLERAS\": \"ase.comercial-01.puertolleras@congente.coop\",\n  \"URIBE\": \"ase.comercial-01.uribe@congente.coop\",\n  \"YOPAL\": \"ase.comercial-01.yopal@congente.coop\",\n  \"VILLANUEVA\": \"ase.comercial-01.villanueva@congente.coop\",\n  \"default\": \"congente.tecnologia@congente.coop\"\n};\n\n/* 2. Procesar resultados */\nconst completados = $json.completed || [];\n\nreturn completados.map((item) => {\n  const agencia = (item.agencia || \"\").trim().toUpperCase().replace(/\\s+/g, \"_\");\n  item.email_agencia = correosAgencias[agencia] || correosAgencias.default;\n  return { json: item };\n});\n"
+      },
+      "id": "function-map-email",
+      "name": "Preparar Email de Agencia",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        750,
+        300
+      ]
+    },
+    {
+      "parameters": {
         "fromEmail": "notificaciones@congente.coop",
-        "toEmail": "={{ $item.email_agencia }}",
-        "subject": "Nueva Intención de Vinculación Digital",
-        "text": "Se ha completado una nueva intención de vinculación digital:\n\nCliente: {{ $json.body.nombres_completos }}\nCédula: {{ $json.body.numero_cedula }}\nAgencia Seleccionada: {{ $json.body.agencia }}\n\nPor favor, buscar al asociado en el sistema para continuar con el proceso.\n\n--\nSistema de Vinculación Digital",
+        "toEmail": "={{ $json.email_agencia }}",
+        "subject": "Nueva Intencion de Vinculacion Digital",
+        "text": "Se ha completado una nueva intencion de vinculacion digital:\n\nCliente: {{ $json.nombres_completos }}\nCedula: {{ $json.numero_cedula }}\nAgencia Seleccionada: {{ $json.agencia }}\n\nPor favor, buscar al asociado en el sistema para continuar con el proceso.\n\n--\nSistema de Vinculacion Digital",
         "options": {}
       },
       "id": "email-agencia",
@@ -43,7 +63,7 @@
       "type": "n8n-nodes-base.emailSend",
       "typeVersion": 2,
       "position": [
-        750,
+        1000,
         300
       ],
       "credentials": {
@@ -52,50 +72,36 @@
           "name": "SMTP Congente"
         }
       }
-    },
-    {
-      "parameters": {
-        "respondWith": "json",
-        "responseBody": "={{ { \"status\": \"success\", \"message\": \"Webhook recibido y procesado\" } }}"
-      },
-      "id": "webhook-response",
-      "name": "Respuesta Webhook",
-      "type": "n8n-nodes-base.respondToWebhook",
-      "typeVersion": 1,
-      "position": [
-        1000,
-        300
-      ]
     }
   ],
   "connections": {
-    "Webhook: Vinculación Completada": {
+    "Cron: Verificar LINIX": {
       "main": [
         [
           {
-            "node": "Buscar Email de Agencia",
+            "node": "HTTP: Verificar LINIX",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Buscar Email de Agencia": {
+    "HTTP: Verificar LINIX": {
+      "main": [
+        [
+          {
+            "node": "Preparar Email de Agencia",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Email de Agencia": {
       "main": [
         [
           {
             "node": "Email a Agencia",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Email a Agencia": {
-      "main": [
-        [
-          {
-            "node": "Respuesta Webhook",
             "type": "main",
             "index": 0
           }

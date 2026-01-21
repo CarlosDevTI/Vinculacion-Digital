@@ -796,6 +796,100 @@ class VerificarLinixView(APIView):
             )
 
 
+class VerificarLinixPendientesView(APIView):
+    """
+    POST /api/v1/linix/verificar-pendientes/
+
+    Ejecuta verificacion en Oracle para preregistros pendientes
+    y retorna los que quedaron completados.
+
+    Body (opcional):
+        {
+            "limit": 100,
+            "ids": [1, 2, 3]
+        }
+    """
+
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        limit = request.data.get('limit')
+        ids = request.data.get('ids')
+
+        try:
+            limit = int(limit) if limit is not None else None
+        except (TypeError, ValueError):
+            limit = None
+
+        preregistros = PreRegistro.objects.filter(
+            flujo_linix_creado=False,
+            estado_biometria=PreRegistro.BIOMETRIA_APROBADO,
+            estado_vinculacion__in=[
+                PreRegistro.ESTADO_EN_LINIX,
+                PreRegistro.ESTADO_BIOMETRIA_OK
+            ]
+        ).order_by('created_at')
+
+        if ids:
+            preregistros = preregistros.filter(id__in=ids)
+
+        if limit:
+            preregistros = preregistros[:limit]
+
+        linix_service = LinixService()
+        completados = []
+        errores = []
+        procesados = 0
+
+        for preregistro in preregistros:
+            procesados += 1
+            resultado = linix_service.verificar_flujo_vinculacion(preregistro.numero_cedula)
+
+            LogIntegracion.objects.create(
+                preregistro=preregistro,
+                accion=LogIntegracion.ACCION_VERIFICACION_ORACLE,
+                exitoso=resultado.get('exitoso', False),
+                request_data={
+                    'numero_cedula': preregistro.numero_cedula,
+                    'origen': 'n8n'
+                },
+                response_data=resultado.get('datos_completos', {}),
+                error_message=resultado.get('error')
+            )
+
+            if resultado.get('exitoso') and resultado.get('encontrado'):
+                preregistro.marcar_como_completado(
+                    id_tercero=resultado.get('id_tercero'),
+                    datos_oracle=resultado.get('datos_completos')
+                )
+                completados.append({
+                    'id': preregistro.id,
+                    'numero_cedula': preregistro.numero_cedula,
+                    'nombres_completos': preregistro.nombres_completos,
+                    'agencia': preregistro.agencia,
+                    'id_tercero_linix': preregistro.id_tercero_linix,
+                    'fecha_completado': (
+                        preregistro.fecha_completado.isoformat()
+                        if preregistro.fecha_completado
+                        else None
+                    )
+                })
+            elif not resultado.get('exitoso'):
+                errores.append({
+                    'id': preregistro.id,
+                    'numero_cedula': preregistro.numero_cedula,
+                    'error': resultado.get('error')
+                })
+
+        return Response(
+            {
+                'processed': procesados,
+                'completed': completados,
+                'errors': errores
+            }
+        )
+
+
 class PreRegistroDetailView(APIView):
     """
     GET /api/v1/preregistro/{id}/

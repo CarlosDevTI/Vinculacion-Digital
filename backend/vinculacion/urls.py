@@ -15,6 +15,7 @@ from .views import (
     DecrimWebhookView,
     LinkLinixView,
     VerificarLinixView,
+    VerificarLinixPendientesView,
     PreRegistroDetailView,
     TestOracleConnectionView
 )
@@ -49,6 +50,13 @@ urlpatterns = [
         'preregistro/<int:pk>/verificar-linix/',
         VerificarLinixView.as_view(),
         name='preregistro-verificar-linix'
+    ),
+
+    # Verificacion periodica en LINIX (n8n)
+    path(
+        'linix/verificar-pendientes/',
+        VerificarLinixPendientesView.as_view(),
+        name='linix-verificar-pendientes'
     ),
     
     # Obtener detalles completos

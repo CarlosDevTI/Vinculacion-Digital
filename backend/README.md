@@ -14,7 +14,10 @@ Esta carpeta contiene el backend en Django/DRF para el flujo de vinculacion digi
 
 2) Validacion identidad (Paso 2)
 - El usuario sigue el link DECRIM.
-- DECRIM valida identidad y finaliza el proceso (callback pendiente de integrar).
+- DECRIM valida identidad y finaliza el proceso.
+- Opcional: Webhook DECRIM segun "DTI_Usuario API Standard WebHook v1.0"
+  (endpoints `POST /api/v1/decrim/token/` y `POST /api/v1/decrim/webhook/`).
+  Si no se usa webhook, el estado se consulta via polling.
 
 3) Link LINIX (Paso 3)
 - Endpoint: `GET /api/v1/preregistro/{id}/link-linix/`
@@ -23,7 +26,12 @@ Esta carpeta contiene el backend en Django/DRF para el flujo de vinculacion digi
 4) Verificacion LINIX / Oracle (Paso 4)
 - Endpoint: `POST /api/v1/preregistro/{id}/verificar-linix/`
 - Ejecuta procedimiento en Oracle para confirmar creacion del tercero.
-- Si existe, marca completado y dispara webhook N8N.
+- Si existe, marca completado (y opcionalmente dispara webhook N8N si esta configurado).
+
+5) Verificacion periodica LINIX / Oracle (Paso 5)
+- Endpoint: `POST /api/v1/linix/verificar-pendientes/`
+- Se usa desde n8n cada 10 minutos para consultar Oracle.
+- Retorna la lista de preregistros completados para notificacion.
 
 ## Ejemplos (requests)
 
@@ -60,6 +68,14 @@ curl http://127.0.0.1:8000/api/v1/preregistro/1/link-linix/
 
 ```bash
 curl -X POST http://127.0.0.1:8000/api/v1/preregistro/1/verificar-linix/
+```
+
+### Paso 5 - Verificacion periodica LINIX (n8n)
+
+```bash
+curl -X POST http://127.0.0.1:8000/api/v1/linix/verificar-pendientes/ \
+  -H "Content-Type: application/json" \
+  -d "{\"limit\":50}"
 ```
 
 ## Archivos tocados (cambios recientes)
@@ -111,6 +127,7 @@ En `backend/vinculacion/views.py`, clase `IniciarPreRegistroView`:
 4) N8N
 - `backend/vinculacion/views.py`
   - Metodo `_enviar_webhook_n8n()`
+  - El flujo programado consulta `POST /api/v1/linix/verificar-pendientes/`
 
 ## Variables principales
 
@@ -140,4 +157,5 @@ Para produccion (PostgreSQL + Oracle + DECRIM), configurar:
 
 ## Pendientes
 
-- Implementar callback de DECRIM (actualmente el backend solo crea el registro y entrega la URL).
+- El webhook de DECRIM esta implementado, pero es opcional y solo aplica si
+  DECRIM envia notificaciones en tiempo real.
