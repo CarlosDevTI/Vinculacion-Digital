@@ -49,3 +49,5 @@ __pycache__/
 *.pyc
 
 backend/.env.example
+.env
+.env.production
