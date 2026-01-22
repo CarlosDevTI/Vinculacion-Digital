@@ -25,14 +25,14 @@ services:
       DJANGO_DEBUG: "False"
       STATIC_ROOT: /opt/VinculacionDigital/static
     volumes:
-      - gunicorn-sock:/opt/VinculacionDigital
+      - gunicorn-sock:/opt/VinculacionDigital/run
       - staticfiles:/opt/VinculacionDigital/static
     depends_on:
       db:
         condition: service_healthy
     command: >
       gunicorn core.wsgi:application
-      --bind unix:/opt/VinculacionDigital/vinculaciondigital.sock
+      --bind unix:/opt/VinculacionDigital/run/vinculaciondigital.sock
       --workers 3
 
   nginx:
@@ -44,7 +44,7 @@ services:
     ports:
       - "8040:8040"
     volumes:
-      - gunicorn-sock:/opt/VinculacionDigital
+      - gunicorn-sock:/opt/VinculacionDigital/run
       - staticfiles:/opt/VinculacionDigital/static:ro
 
 volumes:
