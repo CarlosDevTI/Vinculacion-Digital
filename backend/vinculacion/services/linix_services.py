@@ -7,7 +7,7 @@ Maneja la conexión con la base de datos Oracle
 y la ejecución de procedimientos almacenados.
 """
 
-import cx_Oracle
+import oracledb
 import logging
 from django.conf import settings
 from contextlib import contextmanager
@@ -55,13 +55,13 @@ class LinixService:
         - Más limpio y seguro
         
         Yields:
-            cx_Oracle.Connection: Conexión activa a Oracle
+            oracledb.Connection: Conexión activa a Oracle
         """
         connection = None
         try:
             # Establecer conexión
             logger.debug("Estableciendo conexión con Oracle...")
-            connection = cx_Oracle.connect(
+            connection = oracledb.connect(
                 user=self.oracle_user,
                 password=self.oracle_password,
                 dsn=self.oracle_dsn,
@@ -71,7 +71,7 @@ class LinixService:
             
             yield connection
             
-        except cx_Oracle.DatabaseError as e:
+        except oracledb.DatabaseError as e:
             error, = e.args
             logger.error(f"Error de Oracle: {error.code} - {error.message}")
             raise
@@ -122,10 +122,10 @@ class LinixService:
                 # Ajustar según los parámetros reales de tu procedimiento
                 
                 # OUT parameters
-                out_id_tercero = cursor.var(cx_Oracle.STRING)
-                out_estado = cursor.var(cx_Oracle.STRING)
-                out_mensaje = cursor.var(cx_Oracle.STRING)
-                out_existe = cursor.var(cx_Oracle.NUMBER)
+                out_id_tercero = cursor.var(oracledb.DB_TYPE_VARCHAR)
+                out_estado = cursor.var(oracledb.DB_TYPE_VARCHAR)
+                out_mensaje = cursor.var(oracledb.DB_TYPE_VARCHAR)
+                out_existe = cursor.var(oracledb.DB_TYPE_NUMBER)
                 
                 # TODO: Reemplazar con el nombre real de tu procedimiento
                 # Ejemplo: PKG_VINCULACION.VERIFICAR_FLUJO(?)
@@ -169,7 +169,7 @@ class LinixService:
                     }
                 }
         
-        except cx_Oracle.DatabaseError as e:
+        except oracledb.DatabaseError as e:
             error, = e.args
             logger.error(f"Error ejecutando procedimiento: {error.message}")
             return {
@@ -204,7 +204,7 @@ class LinixService:
         try:
             with self.get_connection() as connection:
                 cursor = connection.cursor()
-                out_cursor = cursor.var(cx_Oracle.CURSOR)
+                out_cursor = cursor.var(oracledb.DB_TYPE_CURSOR)
 
                 cursor.callproc('SP_CONSULTACTU', [numero_cedula, fecha_expedicion, out_cursor])
 
@@ -222,7 +222,7 @@ class LinixService:
                     'encontrado': encontrado
                 }
 
-        except cx_Oracle.DatabaseError as e:
+        except oracledb.DatabaseError as e:
             error, = e.args
             message = error.message or ''
             if 'ORA-20050' in message or 'No existe el asociado' in message:
@@ -298,7 +298,7 @@ class LinixService:
                     logger.info(f"No se encontró tercero con cédula: {numero_cedula}")
                     return None
         
-        except cx_Oracle.DatabaseError as e:
+        except oracledb.DatabaseError as e:
             error, = e.args
             logger.error(f"Error consultando tercero: {error.message}")
             return None
