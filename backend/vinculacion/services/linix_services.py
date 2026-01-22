@@ -37,7 +37,6 @@ class LinixService:
         self.oracle_dsn = getattr(settings, 'ORACLE_DSN', '')  # host:port/service_name
         
         # Configuración de encoding
-        self.encoding = 'UTF-8'
     
     @contextmanager
     def get_connection(self):
@@ -64,8 +63,7 @@ class LinixService:
             connection = oracledb.connect(
                 user=self.oracle_user,
                 password=self.oracle_password,
-                dsn=self.oracle_dsn,
-                encoding=self.encoding
+                dsn=self.oracle_dsn
             )
             logger.debug("Conexión establecida exitosamente")
             
