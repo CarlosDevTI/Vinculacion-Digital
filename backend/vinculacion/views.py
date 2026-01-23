@@ -133,9 +133,33 @@ class IniciarPreRegistroView(APIView):
         
         logger.info("=== Iniciando pre-registro ===")
         
+        numero_cedula_raw = request.data.get('numero_cedula')
+        preregistro_existente = None
+        if numero_cedula_raw:
+            preregistro_existente = PreRegistro.objects.filter(
+                numero_cedula=numero_cedula_raw
+            ).first()
+
+        max_intentos = int(getattr(settings, 'MAX_INTENTOS_BIOMETRIA', 2))
+        if preregistro_existente and preregistro_existente.vetado:
+            return Response(
+                {
+                    'error': 'Intentos de validacion agotados',
+                    'detalle': (
+                        'El ciudadano se encuentra vetado. Debe comunicarse con '
+                        'Congente para habilitar un nuevo intento.'
+                    ),
+                    'codigo': 'VETADO',
+                    'intentos': preregistro_existente.intentos_biometria,
+                    'max_intentos': max_intentos
+                },
+                status=status.HTTP_403_FORBIDDEN
+            )
+
         # Crear serializer con los datos recibidos
         # context={'request': request} permite que el serializer acceda al request
         serializer = PreRegistroCreateSerializer(
+            instance=preregistro_existente,
             data=request.data,
             context={'request': request}
         )
@@ -147,6 +171,27 @@ class IniciarPreRegistroView(APIView):
             fecha_expedicion = data['fecha_expedicion']
             tipo_documento = data['tipo_documento']
             nombres = data['nombres_completos']
+
+            if preregistro_existente:
+                if preregistro_existente.estado_vinculacion == PreRegistro.ESTADO_COMPLETADO:
+                    return Response(
+                        {
+                            'error': 'El ciudadano ya completo la vinculacion digital'
+                        },
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+
+                if preregistro_existente.url_biometria and preregistro_existente.estado_biometria in [
+                    PreRegistro.BIOMETRIA_PENDIENTE,
+                    PreRegistro.BIOMETRIA_EN_PROCESO,
+                    PreRegistro.BIOMETRIA_APROBADO
+                ]:
+                    preregistro = serializer.save()
+                    response_serializer = PreRegistroDetailSerializer(preregistro)
+                    return Response(
+                        response_serializer.data,
+                        status=status.HTTP_200_OK
+                    )
 
             # Validar si ya es asociado antes de generar registro digital
             linix_service = LinixService()
@@ -175,6 +220,24 @@ class IniciarPreRegistroView(APIView):
 
             # Guardar en base de datos
             preregistro = serializer.save()
+
+            preregistro.estado_vinculacion = PreRegistro.ESTADO_INICIADO
+            preregistro.mensaje_error = None
+            preregistro.justificacion_biometria = None
+            preregistro.fecha_validacion_biometria = None
+            preregistro.estado_biometria = PreRegistro.BIOMETRIA_PENDIENTE
+            preregistro.idcaso_biometria = None
+            preregistro.url_biometria = None
+            preregistro.save(update_fields=[
+                'estado_vinculacion',
+                'mensaje_error',
+                'justificacion_biometria',
+                'fecha_validacion_biometria',
+                'estado_biometria',
+                'idcaso_biometria',
+                'url_biometria',
+                'updated_at'
+            ])
 
             # Crear registro en DECRIM para obtener URL de validación
             biometria_service = BiometriaService()
@@ -336,6 +399,18 @@ class EstadoBiometriaView(APIView):
                 if estado_normalizado == PreRegistro.BIOMETRIA_APROBADO:
                     preregistro.fecha_validacion_biometria = timezone.now()
                     preregistro.estado_vinculacion = PreRegistro.ESTADO_BIOMETRIA_OK
+
+                if estado_normalizado == PreRegistro.BIOMETRIA_RECHAZADO:
+                    max_intentos = int(getattr(settings, 'MAX_INTENTOS_BIOMETRIA', 2))
+                    preregistro.intentos_biometria = (preregistro.intentos_biometria or 0) + 1
+                    preregistro.estado_vinculacion = PreRegistro.ESTADO_ERROR
+                    preregistro.mensaje_error = 'Validacion de identidad rechazada.'
+                    if preregistro.intentos_biometria >= max_intentos:
+                        preregistro.vetado = True
+                        preregistro.mensaje_error = (
+                            'Validacion de identidad rechazada. '
+                            'Debe comunicarse con Congente para habilitar un nuevo intento.'
+                        )
                 
                 preregistro.save()
             

@@ -28,6 +28,8 @@ class PreRegistroAdmin(admin.ModelAdmin):
         'numero_cedula',
         'nombres_completos',
         'estado_biometria',
+        'intentos_biometria',
+        'vetado',
         'estado_vinculacion',
         'flujo_linix_creado',
         'created_at'
@@ -36,6 +38,7 @@ class PreRegistroAdmin(admin.ModelAdmin):
     # Filtros en la barra lateral
     list_filter = [
         'estado_biometria',
+        'vetado',
         'estado_vinculacion',
         'flujo_linix_creado',
         'created_at'
@@ -72,6 +75,13 @@ class PreRegistroAdmin(admin.ModelAdmin):
                 'idcaso_biometria',
                 'justificacion_biometria',
                 'fecha_validacion_biometria'
+            )
+        }),
+        ('Control de Intentos', {
+            'fields': (
+                'intentos_biometria',
+                'vetado',
+                'mensaje_error'
             )
         }),
         ('Integración LINIX', {

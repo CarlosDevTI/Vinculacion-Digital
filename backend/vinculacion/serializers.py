@@ -112,6 +112,19 @@ class PreRegistroCreateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Tipo de documento no válido")
         return value
     
+    def _apply_auditoria(self, validated_data):
+        request = self.context.get('request')
+        if request:
+            x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+            if x_forwarded_for:
+                ip = x_forwarded_for.split(',')[0]
+            else:
+                ip = request.META.get('REMOTE_ADDR')
+
+            validated_data['ip_registro'] = ip
+            validated_data['user_agent'] = request.META.get('HTTP_USER_AGENT', '')
+        return validated_data
+
     def create(self, validated_data):
         """
         Crea el pre-registro con datos adicionales de auditoría.
@@ -122,22 +135,15 @@ class PreRegistroCreateSerializer(serializers.ModelSerializer):
         Returns:
             PreRegistro: Instancia creada
         """
-        # Obtener request desde el contexto (lo pasamos desde la view)
-        request = self.context.get('request')
-        
-        if request:
-            # Capturar IP del usuario
-            x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
-            if x_forwarded_for:
-                # Si está detrás de un proxy, tomar la primera IP
-                ip = x_forwarded_for.split(',')[0]
-            else:
-                ip = request.META.get('REMOTE_ADDR')
-            
-            validated_data['ip_registro'] = ip
-            validated_data['user_agent'] = request.META.get('HTTP_USER_AGENT', '')
-        
+        validated_data = self._apply_auditoria(validated_data)
         return super().create(validated_data)
+
+    def update(self, instance, validated_data):
+        """
+        Actualiza el pre-registro (reintentos controlados).
+        """
+        validated_data = self._apply_auditoria(validated_data)
+        return super().update(instance, validated_data)
 
 
 class PreRegistroDetailSerializer(serializers.ModelSerializer):

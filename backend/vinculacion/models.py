@@ -157,6 +157,16 @@ class PreRegistro(models.Model):
         null=True,
         help_text="Cuándo se completó la validación biométrica"
     )
+
+    intentos_biometria = models.PositiveSmallIntegerField(
+        default=0,
+        help_text="Intentos fallidos de validacion biometrica"
+    )
+
+    vetado = models.BooleanField(
+        default=False,
+        help_text="Bloquea nuevos intentos hasta apertura manual"
+    )
     
     # ============================================
     # INTEGRACIÓN CON LINIX (PASO 3 y 4)

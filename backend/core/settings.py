@@ -86,6 +86,7 @@ DECRIM_PASSWORD = os.environ.get(
     'DECRIM_PASSWORD',
     os.environ.get('PASSWORD_DECRIM', '')
 )
+MAX_INTENTOS_BIOMETRIA = int(os.environ.get('MAX_INTENTOS_BIOMETRIA', '2'))
 
 ORACLE_USER = os.environ.get('ORACLE_USER', os.environ.get('ORACLE_DB_USER', ''))
 ORACLE_PASSWORD = os.environ.get('ORACLE_PASSWORD', os.environ.get('ORACLE_DB_PASSWORD', ''))
