@@ -373,7 +373,7 @@ class EstadoBiometriaView(APIView):
             preregistro=preregistro,
             accion=LogIntegracion.ACCION_CONSULTA_BIOMETRIA,
             exitoso=resultado.get('exitoso', False),
-            request_data={'numero_cedula': preregistro.numero_cedula},
+            request_data=resultado.get('request_data', {}),
             response_data=resultado.get('datos_completos', {}),
             error_message=resultado.get('error'),
             tiempo_respuesta_ms=resultado.get('tiempo_respuesta_ms')
@@ -460,7 +460,15 @@ class EstadoBiometriaView(APIView):
             
             # Cualquier otro error
             logger.error(f"Error consultando biometría: {error_msg}")
-            
+            if error_msg and 'IDCaso o DNI' in error_msg:
+                return Response(
+                    {
+                        'error': error_msg,
+                        'estado_biometria': preregistro.estado_biometria
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
             return Response(
                 {
                     'error': error_msg,

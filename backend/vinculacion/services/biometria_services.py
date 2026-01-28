@@ -63,12 +63,25 @@ class BiometriaService:
         certificado_valor = self.consulta_certificado if incluir_certificado is None else (
             "1" if incluir_certificado else "0"
         )
-        if idcaso:
-            idcaso_value = str(idcaso)
+        idcaso_raw = str(idcaso).strip() if idcaso is not None else ''
+        dni_raw = str(numero_cedula).strip() if numero_cedula is not None else ''
+
+        if idcaso_raw and idcaso_raw != "0":
+            idcaso_value = idcaso_raw
             dni_value = "0"
-        else:
+        elif dni_raw and dni_raw != "0":
             idcaso_value = "0"
-            dni_value = str(numero_cedula or "0")
+            dni_value = dni_raw
+        else:
+            return {
+                'exitoso': False,
+                'error': 'IDCaso o DNI son requeridos para la consulta.',
+                'request_data': {
+                    'Idcaso': idcaso_raw or "0",
+                    'Dni': dni_raw or "0",
+                    'Canal': str(self.consulta_canal),
+                }
+            }
         payload = {
             "Username": self.username,
             "Password": self.password,
@@ -78,6 +91,9 @@ class BiometriaService:
             "Imagenes": "1" if incluir_imagenes else "0",
             "Certificado": str(certificado_valor)
         }
+        payload_safe = dict(payload)
+        if payload_safe.get("Password"):
+            payload_safe["Password"] = "***"
 
         start_time = time.monotonic()
         try:
@@ -101,7 +117,7 @@ class BiometriaService:
                     'idcaso': data_payload.get('Idcaso'),
                     'justificacion': data_payload.get('Justificacion', ''),
                     'datos_completos': data,
-                    'request_data': payload,
+                    'request_data': payload_safe,
                     'tiempo_respuesta_ms': elapsed_ms
                 }
 
@@ -112,7 +128,7 @@ class BiometriaService:
                     'estado': 'NO_ENCONTRADO',
                     'error': data.get('message', 'Caso no encontrado'),
                     'datos_completos': data,
-                    'request_data': payload,
+                    'request_data': payload_safe,
                     'tiempo_respuesta_ms': elapsed_ms
                 }
 
@@ -123,7 +139,7 @@ class BiometriaService:
                     'estado': 'EN_PROCESO',
                     'error': data.get('message', 'Caso aun no disponible'),
                     'datos_completos': data,
-                    'request_data': payload,
+                    'request_data': payload_safe,
                     'tiempo_respuesta_ms': elapsed_ms
                 }
 
@@ -134,7 +150,7 @@ class BiometriaService:
                     'estado': 'NO_AUTORIZADO',
                     'error': data.get('message', 'Caso no pertenece a la entidad'),
                     'datos_completos': data,
-                    'request_data': payload,
+                    'request_data': payload_safe,
                     'tiempo_respuesta_ms': elapsed_ms
                 }
 
@@ -143,7 +159,7 @@ class BiometriaService:
                 'error': data.get('message') if isinstance(data, dict) else None
                 or f'Error del proveedor: {response.status_code}',
                 'datos_completos': data,
-                'request_data': payload,
+                'request_data': payload_safe,
                 'tiempo_respuesta_ms': elapsed_ms
             }
 
@@ -152,7 +168,7 @@ class BiometriaService:
             return {
                 'exitoso': False,
                 'error': 'Timeout: El proveedor no respondio a tiempo',
-                'request_data': payload,
+                'request_data': payload_safe,
                 'tiempo_respuesta_ms': elapsed_ms
             }
 
@@ -161,7 +177,7 @@ class BiometriaService:
             return {
                 'exitoso': False,
                 'error': 'No se pudo conectar con el proveedor de validacion',
-                'request_data': payload,
+                'request_data': payload_safe,
                 'tiempo_respuesta_ms': elapsed_ms
             }
 
@@ -171,7 +187,7 @@ class BiometriaService:
             return {
                 'exitoso': False,
                 'error': f'Error inesperado: {str(e)}',
-                'request_data': payload,
+                'request_data': payload_safe,
                 'tiempo_respuesta_ms': elapsed_ms
             }
 

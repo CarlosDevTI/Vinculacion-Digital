@@ -53,7 +53,7 @@ backend/.env.example
 .env.production
 
 #! Archivos de documentación
-instalacion
-Estructura_ideal
-Funcionamiento
+instalacion.txt
+Estructura_ideal.txt
+Funcionamiento.txt
 credenciales.txt 

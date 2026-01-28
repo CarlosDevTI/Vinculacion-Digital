@@ -255,9 +255,12 @@ const VinculacionDigital = () => {
     },
   ];
   const actualizarDatosBasicos = (campo, valor) => {
+    const valorNormalizado = campo === 'nombres_completos'
+      ? valor.toUpperCase()
+      : valor;
     setDatosBasicos(prev => ({
       ...prev,
-      [campo]: valor
+      [campo]: valorNormalizado
     }));
   };
 
