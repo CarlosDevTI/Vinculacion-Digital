@@ -23,6 +23,10 @@ const VinculacionDigital = () => {
   const [linkLinix, setLinkLinix] = useState('');
   const [linkBiometria, setLinkBiometria] = useState('');
   const [verificacionFinalizada, setVerificacionFinalizada] = useState(false);
+  const [estadoBiometriaInfo, setEstadoBiometriaInfo] = useState({
+    mensaje: '',
+    justificacion: ''
+  });
 
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
   
@@ -86,8 +90,7 @@ const VinculacionDigital = () => {
     setModal({ show: true, title, message });
   };
 
-  const handlePreRegistro = async (e) => {
-    e.preventDefault();
+  const crearPreRegistro = async () => {
     setLoading(true);
 
     if (!datosBasicos.nombres_completos || !datosBasicos.numero_cedula || 
@@ -108,6 +111,13 @@ const VinculacionDigital = () => {
 
       if (!response.ok) {
         const errorData = await response.json();
+        if (response.status === 403 && errorData?.codigo === 'VETADO') {
+          showModal(
+            'Validación bloqueada',
+            'Este documento quedó vetado tras dos intentos fallidos. Por favor comunícate con Congente para habilitar un nuevo intento.'
+          );
+          return;
+        }
         if (errorData?.error?.includes('ya es asociado')) {
           showModal(
             'Asociado existente',
@@ -121,6 +131,7 @@ const VinculacionDigital = () => {
       const data = await response.json();
       setPreregistroId(data.id);
       setLinkBiometria(data.link_biometria || data.url_biometria || '');
+      setEstadoBiometriaInfo({ mensaje: '', justificacion: '' });
       
       if (data.link_biometria || data.url_biometria || LINK_BIOMETRIA) {
         const url = data.link_biometria || data.url_biometria || LINK_BIOMETRIA;
@@ -135,6 +146,15 @@ const VinculacionDigital = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handlePreRegistro = async (e) => {
+    e.preventDefault();
+    await crearPreRegistro();
+  };
+
+  const reintentarValidacion = async () => {
+    await crearPreRegistro();
   };
 
   const iniciarPollingBiometria = (id) => {
@@ -168,6 +188,10 @@ const VinculacionDigital = () => {
       console.log('Estado biometría:', data.estado_biometria);
       
       setEstadoBiometria(data.estado_biometria);
+      setEstadoBiometriaInfo({
+        mensaje: data.mensaje || '',
+        justificacion: data.justificacion || ''
+      });
       
       return data.estado_biometria;
     } catch (err) {
@@ -262,6 +286,13 @@ const VinculacionDigital = () => {
       ...prev,
       [campo]: valorNormalizado
     }));
+  };
+
+  const resumenJustificacion = (texto) => {
+    if (!texto) return '';
+    const limpio = String(texto).trim();
+    if (limpio.length <= 90) return limpio;
+    return `${limpio.slice(0, 90)}...`;
   };
 
   const Notification = ({ message, show, onClose }) => {
@@ -495,7 +526,7 @@ const VinculacionDigital = () => {
                     ¡Validación Exitosa!
                   </p>
                   <p className="text-gray-600">
-                    Redirigiendo al formulario de LINIX...
+                    {estadoBiometriaInfo.mensaje || 'Redirigiendo al formulario de LINIX...'}
                   </p>
                 </>
               ) : estadoBiometria === 'RECHAZADO' ? (
@@ -505,15 +536,33 @@ const VinculacionDigital = () => {
                     Validación Rechazada
                   </p>
                   <p className="text-gray-600">
-                    No fue posible validar tu identidad. Por favor contacta a un asesor.
+                    {estadoBiometriaInfo.mensaje || 'No fue posible validar tu identidad.'}
                   </p>
+                  {estadoBiometriaInfo.justificacion && (
+                    <p className="text-sm text-gray-500 mt-2">
+                      Motivo: {resumenJustificacion(estadoBiometriaInfo.justificacion)}
+                    </p>
+                  )}
+                  <button
+                    onClick={reintentarValidacion}
+                    disabled={loading}
+                    className="mt-6 text-white px-6 py-2 rounded-lg transition-colors disabled:bg-gray-400"
+                    style={{ backgroundColor: loading ? '#9CA3AF' : '#D56911' }}
+                  >
+                    Reintentar Validación
+                  </button>
                 </>
               ) : (
                 <>
                   <Loader2 className="w-16 h-16 mx-auto mb-4 animate-spin" style={{ color: '#0d4974ff' }} />
                   <p className="text-gray-600 mb-4">
-                    Esperando validación biométrica...
+                    {estadoBiometriaInfo.mensaje || 'Esperando validación biométrica...'}
                   </p>
+                  {estadoBiometriaInfo.justificacion && (
+                    <p className="text-sm text-gray-500 mb-4">
+                      {resumenJustificacion(estadoBiometriaInfo.justificacion)}
+                    </p>
+                  )}
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 max-w-md mx-auto">
                     <p className="text-sm text-gray-700 mb-4">
                       {(LINK_BIOMETRIA || linkBiometria) 
