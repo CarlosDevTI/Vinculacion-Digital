@@ -66,130 +66,145 @@ class BiometriaService:
         idcaso_raw = str(idcaso).strip() if idcaso is not None else ''
         dni_raw = str(numero_cedula).strip() if numero_cedula is not None else ''
 
-        if idcaso_raw and idcaso_raw != "0":
-            idcaso_value = idcaso_raw
-            dni_value = "0"
-        elif dni_raw and dni_raw != "0":
-            idcaso_value = "0"
-            dni_value = dni_raw
-        else:
+        if not idcaso_raw and not dni_raw:
             return {
                 'exitoso': False,
                 'error': 'IDCaso o DNI son requeridos para la consulta.',
                 'request_data': {
-                    'Idcaso': idcaso_raw or "0",
-                    'Dni': dni_raw or "0",
+                    'Idcaso': "0",
+                    'Dni': "0",
                     'Canal': str(self.consulta_canal),
                 }
             }
-        payload = {
-            "Username": self.username,
-            "Password": self.password,
-            "Idcaso": idcaso_value,
-            "Dni": dni_value,
-            "Canal": str(self.consulta_canal),
-            "Imagenes": "1" if incluir_imagenes else "0",
-            "Certificado": str(certificado_valor)
-        }
-        payload_safe = dict(payload)
-        if payload_safe.get("Password"):
-            payload_safe["Password"] = "***"
 
-        start_time = time.monotonic()
-        try:
-            response = requests.post(
-                self.consulta_url,
-                json=payload,
-                headers={
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
-                timeout=self.timeout
-            )
-            elapsed_ms = int((time.monotonic() - start_time) * 1000)
-            data = response.json() if response.content else {}
+        def _build_payload(idcaso_value, dni_value):
+            payload = {
+                "Username": self.username,
+                "Password": self.password,
+                "Idcaso": idcaso_value,
+                "Dni": dni_value,
+                "Canal": str(self.consulta_canal),
+                "Imagenes": "1" if incluir_imagenes else "0",
+                "Certificado": str(certificado_valor)
+            }
+            payload_safe = dict(payload)
+            if payload_safe.get("Password"):
+                payload_safe["Password"] = "***"
+            return payload, payload_safe
 
-            if response.status_code == 200 and data.get('status') == 200:
-                data_payload = data.get('data', {})
-                return {
-                    'exitoso': True,
-                    'estado': data_payload.get('Estado'),
-                    'idcaso': data_payload.get('Idcaso'),
-                    'justificacion': data_payload.get('Justificacion', ''),
-                    'datos_completos': data,
-                    'request_data': payload_safe,
-                    'tiempo_respuesta_ms': elapsed_ms
-                }
+        def _post(payload, payload_safe):
+            start_time = time.monotonic()
+            try:
+                response = requests.post(
+                    self.consulta_url,
+                    json=payload,
+                    headers={
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    timeout=self.timeout
+                )
+                elapsed_ms = int((time.monotonic() - start_time) * 1000)
+                data = response.json() if response.content else {}
 
-            if response.status_code == 404 or data.get('status') == 404:
-                logger.info("Caso no encontrado en DECRIM: %s", payload)
+                if response.status_code == 200 and data.get('status') == 200:
+                    data_payload = data.get('data', {})
+                    return {
+                        'exitoso': True,
+                        'estado': data_payload.get('Estado'),
+                        'idcaso': data_payload.get('Idcaso'),
+                        'justificacion': data_payload.get('Justificacion', ''),
+                        'datos_completos': data,
+                        'request_data': payload_safe,
+                        'tiempo_respuesta_ms': elapsed_ms
+                    }
+
+                if response.status_code == 404 or data.get('status') == 404:
+                    logger.info("Caso no encontrado en DECRIM: %s", payload_safe)
+                    return {
+                        'exitoso': False,
+                        'estado': 'NO_ENCONTRADO',
+                        'error': data.get('message', 'Caso no encontrado'),
+                        'datos_completos': data,
+                        'request_data': payload_safe,
+                        'tiempo_respuesta_ms': elapsed_ms
+                    }
+
+                if response.status_code == 409 or data.get('status') == 409:
+                    logger.info("Caso en proceso en DECRIM (409): %s", payload_safe)
+                    return {
+                        'exitoso': False,
+                        'estado': 'EN_PROCESO',
+                        'error': data.get('message', 'Caso aun no disponible'),
+                        'datos_completos': data,
+                        'request_data': payload_safe,
+                        'tiempo_respuesta_ms': elapsed_ms
+                    }
+
+                if response.status_code == 403 or data.get('status') == 403:
+                    logger.warning("Caso no autorizado para entidad en DECRIM: %s", payload_safe)
+                    return {
+                        'exitoso': False,
+                        'estado': 'NO_AUTORIZADO',
+                        'error': data.get('message', 'Caso no pertenece a la entidad'),
+                        'datos_completos': data,
+                        'request_data': payload_safe,
+                        'tiempo_respuesta_ms': elapsed_ms
+                    }
+
                 return {
                     'exitoso': False,
-                    'estado': 'NO_ENCONTRADO',
-                    'error': data.get('message', 'Caso no encontrado'),
+                    'error': data.get('message') if isinstance(data, dict) else None
+                    or f'Error del proveedor: {response.status_code}',
                     'datos_completos': data,
                     'request_data': payload_safe,
                     'tiempo_respuesta_ms': elapsed_ms
                 }
 
-            if response.status_code == 409 or data.get('status') == 409:
-                logger.info("Caso en proceso en DECRIM (409): %s", payload)
+            except requests.exceptions.Timeout:
+                elapsed_ms = int((time.monotonic() - start_time) * 1000)
                 return {
                     'exitoso': False,
-                    'estado': 'EN_PROCESO',
-                    'error': data.get('message', 'Caso aun no disponible'),
-                    'datos_completos': data,
+                    'error': 'Timeout: El proveedor no respondio a tiempo',
                     'request_data': payload_safe,
                     'tiempo_respuesta_ms': elapsed_ms
                 }
 
-            if response.status_code == 403 or data.get('status') == 403:
-                logger.warning("Caso no autorizado para entidad en DECRIM: %s", payload)
+            except requests.exceptions.ConnectionError:
+                elapsed_ms = int((time.monotonic() - start_time) * 1000)
                 return {
                     'exitoso': False,
-                    'estado': 'NO_AUTORIZADO',
-                    'error': data.get('message', 'Caso no pertenece a la entidad'),
-                    'datos_completos': data,
+                    'error': 'No se pudo conectar con el proveedor de validacion',
                     'request_data': payload_safe,
                     'tiempo_respuesta_ms': elapsed_ms
                 }
 
-            return {
-                'exitoso': False,
-                'error': data.get('message') if isinstance(data, dict) else None
-                or f'Error del proveedor: {response.status_code}',
-                'datos_completos': data,
-                'request_data': payload_safe,
-                'tiempo_respuesta_ms': elapsed_ms
-            }
+            except Exception as e:
+                logger.exception(f"Error inesperado consultando caso en DECRIM: {str(e)}")
+                elapsed_ms = int((time.monotonic() - start_time) * 1000)
+                return {
+                    'exitoso': False,
+                    'error': f'Error inesperado: {str(e)}',
+                    'request_data': payload_safe,
+                    'tiempo_respuesta_ms': elapsed_ms
+                }
 
-        except requests.exceptions.Timeout:
-            elapsed_ms = int((time.monotonic() - start_time) * 1000)
-            return {
-                'exitoso': False,
-                'error': 'Timeout: El proveedor no respondio a tiempo',
-                'request_data': payload_safe,
-                'tiempo_respuesta_ms': elapsed_ms
-            }
+        if idcaso_raw and idcaso_raw != "0":
+            payload, payload_safe = _build_payload(idcaso_raw, "0")
+            resultado = _post(payload, payload_safe)
+            if (
+                not resultado.get('exitoso')
+                and resultado.get('error')
+                and 'IDCaso o DNI' in resultado.get('error', '')
+                and dni_raw
+            ):
+                logger.info("Reintentando consulta DECRIM por DNI")
+                payload, payload_safe = _build_payload("0", dni_raw)
+                resultado = _post(payload, payload_safe)
+            return resultado
 
-        except requests.exceptions.ConnectionError:
-            elapsed_ms = int((time.monotonic() - start_time) * 1000)
-            return {
-                'exitoso': False,
-                'error': 'No se pudo conectar con el proveedor de validacion',
-                'request_data': payload_safe,
-                'tiempo_respuesta_ms': elapsed_ms
-            }
-
-        except Exception as e:
-            logger.exception(f"Error inesperado consultando caso en DECRIM: {str(e)}")
-            elapsed_ms = int((time.monotonic() - start_time) * 1000)
-            return {
-                'exitoso': False,
-                'error': f'Error inesperado: {str(e)}',
-                'request_data': payload_safe,
-                'tiempo_respuesta_ms': elapsed_ms
-            }
+        payload, payload_safe = _build_payload("0", dni_raw)
+        return _post(payload, payload_safe)
 
     def interpretar_estado(self, estado_codigo):
         """
