@@ -14,5 +14,11 @@ Ventajas de separar en services:
 
 from .biometria_services import BiometriaService
 from .linix_services import LinixService
+from .vinculacion_agil_services import VinculacionAgilService, VinculacionAgilError
 
-__all__ = ['BiometriaService', 'LinixService']
+__all__ = [
+    'BiometriaService',
+    'LinixService',
+    'VinculacionAgilService',
+    'VinculacionAgilError',
+]

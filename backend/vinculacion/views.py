@@ -3,12 +3,12 @@
 """
 VIEWS - Endpoints de la API REST
 =================================
-Aquí definimos los endpoints que consumirá el frontend React.
+Aqui definimos los endpoints que consumira el frontend React.
 
 Arquitectura:
 - Usamos Django REST Framework (DRF)
 - APIView para endpoints personalizados
-- Validación con serializers
+- Validacion con serializers
 - Respuestas estandarizadas con Response
 """
 
@@ -31,9 +31,10 @@ from .serializers import (
     PreRegistroCreateSerializer,
     PreRegistroDetailSerializer,
     EstadoBiometriaSerializer,
-    VerificacionLinixSerializer
+    VerificacionLinixSerializer,
+    VinculacionAgilSerializer
 )
-from .services import BiometriaService, LinixService
+from .services import BiometriaService, LinixService, VinculacionAgilService, VinculacionAgilError
 
 # Configurar logger
 logger = logging.getLogger(__name__)
@@ -114,15 +115,15 @@ class IniciarPreRegistroView(APIView):
     
     Response 400:
         {
-            "error": "Ya existe un registro con esta cédula"
+            "error": "Ya existe un registro con esta cedula"
         }
     """
     
-    permission_classes = [AllowAny]  # Endpoint público (sin autenticación)
+    permission_classes = [AllowAny]  # Endpoint publico (sin autenticacion)
     
     def post(self, request):
         """
-        Maneja la petición POST para crear pre-registro.
+        Maneja la peticion POST para crear pre-registro.
         
         Args:
             request: Request de Django con los datos en request.data
@@ -239,7 +240,53 @@ class IniciarPreRegistroView(APIView):
                 'updated_at'
             ])
 
-            # Crear registro en DECRIM para obtener URL de validación
+            dev_skip_decrim = bool(getattr(settings, 'DEV_SKIP_DECRIM', False) and settings.DEBUG)
+            dev_auto_approve = bool(getattr(settings, 'DEV_BIOMETRIA_AUTO_APPROVE', False) and settings.DEBUG)
+            if dev_skip_decrim:
+                preregistro.idcaso_biometria = f"DRYRUN-{preregistro.numero_cedula}"
+                preregistro.url_biometria = ""
+                preregistro.estado_biometria = (
+                    PreRegistro.BIOMETRIA_APROBADO
+                    if dev_auto_approve
+                    else PreRegistro.BIOMETRIA_EN_PROCESO
+                )
+                if dev_auto_approve:
+                    preregistro.fecha_validacion_biometria = timezone.now()
+                    preregistro.estado_vinculacion = PreRegistro.ESTADO_BIOMETRIA_OK
+
+                preregistro.save(update_fields=[
+                    'idcaso_biometria',
+                    'url_biometria',
+                    'estado_biometria',
+                    'fecha_validacion_biometria',
+                    'estado_vinculacion',
+                    'updated_at'
+                ])
+
+                LogIntegracion.objects.create(
+                    preregistro=preregistro,
+                    accion=LogIntegracion.ACCION_REGISTRO_DECRIM,
+                    exitoso=True,
+                    request_data={
+                        'numero_cedula': numero_cedula,
+                        'tipo_documento': tipo_documento,
+                        'modo_prueba': 'DEV_SKIP_DECRIM'
+                    },
+                    response_data={
+                        'status': 200,
+                        'message': 'DECRIM omitido por configuracion de desarrollo',
+                        'auto_aprobado': dev_auto_approve
+                    },
+                    error_message=None
+                )
+
+                response_serializer = PreRegistroDetailSerializer(preregistro)
+                return Response(
+                    response_serializer.data,
+                    status=status.HTTP_201_CREATED
+                )
+
+            # Crear registro en DECRIM para obtener URL de validacion
             biometria_service = BiometriaService()
             resultado = biometria_service.crear_registro_decrim(
                 numero_cedula,
@@ -262,7 +309,7 @@ class IniciarPreRegistroView(APIView):
                 )
                 return Response(
                     {
-                        'error': 'No se pudo generar el link de validación',
+                        'error': 'No se pudo generar el link de validacion',
                         'detalle': resultado.get('error')
                     },
                     status=status.HTTP_502_BAD_GATEWAY
@@ -278,24 +325,24 @@ class IniciarPreRegistroView(APIView):
                 'updated_at'
             ])
             
-            logger.info(f"Pre-registro creado exitosamente: ID={preregistro.id}, Cédula={preregistro.numero_cedula}")
+            logger.info(f"Pre-registro creado exitosamente: ID={preregistro.id}, Cedula={preregistro.numero_cedula}")
             
             # Serializar el objeto completo para la respuesta
             response_serializer = PreRegistroDetailSerializer(preregistro)
             
-            # Retornar respuesta con código 201 (Created)
+            # Retornar respuesta con codigo 201 (Created)
             return Response(
                 response_serializer.data,
                 status=status.HTTP_201_CREATED
             )
         
         else:
-            # Si hay errores de validación
-            logger.warning(f"Error de validación: {serializer.errors}")
+            # Si hay errores de validacion
+            logger.warning(f"Error de validacion: {serializer.errors}")
             
             return Response(
                 {
-                    'error': 'Datos inválidos',
+                    'error': 'Datos invalidos',
                     'detalles': serializer.errors
                 },
                 status=status.HTTP_400_BAD_REQUEST
@@ -306,12 +353,12 @@ class EstadoBiometriaView(APIView):
     """
     GET /api/v1/preregistro/{id}/estado-biometria/
     
-    Consulta el estado de la validación biométrica (Paso 2 - Polling).
+    Consulta el estado de la validacion biometrica (Paso 2 - Polling).
     
     Este endpoint:
     1. Obtiene el pre-registro por ID
-    2. Consulta la API del proveedor de biometría
-    3. Actualiza el estado en la BD si cambió
+    2. Consulta la API del proveedor de biometria
+    3. Actualiza el estado en la BD si cambio
     4. Retorna el estado actual
     
     Response 200:
@@ -319,7 +366,7 @@ class EstadoBiometriaView(APIView):
             "estado_biometria": "APROBADO",
             "puede_continuar": true,
             "justificacion": "E01. Cedula OK, confronta facial OK",
-            "mensaje": "Validación biométrica exitosa"
+            "mensaje": "Validacion biometrica exitosa"
         }
     
     Response 404:
@@ -332,7 +379,7 @@ class EstadoBiometriaView(APIView):
     
     def get(self, request, pk):
         """
-        Maneja la petición GET para consultar estado de biometría.
+        Maneja la peticion GET para consultar estado de biometria.
         
         Args:
             request: Request de Django
@@ -342,12 +389,36 @@ class EstadoBiometriaView(APIView):
             Response: JSON con el estado actual
         """
         
-        logger.info(f"=== Consultando estado biometría para pre-registro ID={pk} ===")
+        logger.info(f"=== Consultando estado biometria para pre-registro ID={pk} ===")
         
         # Obtener el pre-registro o retornar 404 si no existe
         preregistro = get_object_or_404(PreRegistro, pk=pk)
+
+        dev_auto_approve = bool(getattr(settings, 'DEV_BIOMETRIA_AUTO_APPROVE', False) and settings.DEBUG)
+        if dev_auto_approve and preregistro.estado_biometria in [
+            PreRegistro.BIOMETRIA_PENDIENTE,
+            PreRegistro.BIOMETRIA_EN_PROCESO
+        ]:
+            preregistro.estado_biometria = PreRegistro.BIOMETRIA_APROBADO
+            preregistro.fecha_validacion_biometria = timezone.now()
+            preregistro.estado_vinculacion = PreRegistro.ESTADO_BIOMETRIA_OK
+            preregistro.justificacion_biometria = "APROBADO por modo de prueba local."
+            preregistro.save(update_fields=[
+                'estado_biometria',
+                'fecha_validacion_biometria',
+                'estado_vinculacion',
+                'justificacion_biometria',
+                'updated_at'
+            ])
+
+            return Response({
+                'estado_biometria': PreRegistro.BIOMETRIA_APROBADO,
+                'puede_continuar': True,
+                'justificacion': preregistro.justificacion_biometria,
+                'mensaje': 'Validacion biometrica aprobada en modo de prueba'
+            })
         
-        # Si ya está aprobado o rechazado, no consultar de nuevo
+        # Si ya esta aprobado o rechazado, no consultar de nuevo
         if preregistro.estado_biometria in [
             PreRegistro.BIOMETRIA_APROBADO,
             PreRegistro.BIOMETRIA_RECHAZADO
@@ -368,7 +439,7 @@ class EstadoBiometriaView(APIView):
             preregistro.idcaso_biometria
         )
         
-        # Crear log de la integración
+        # Crear log de la integracion
         log = LogIntegracion.objects.create(
             preregistro=preregistro,
             accion=LogIntegracion.ACCION_CONSULTA_BIOMETRIA,
@@ -387,7 +458,7 @@ class EstadoBiometriaView(APIView):
             # Interpretar el estado
             estado_normalizado, descripcion = biometria_service.interpretar_estado(estado_codigo)
             
-            # Actualizar pre-registro si el estado cambió
+            # Actualizar pre-registro si el estado cambio
             if preregistro.estado_biometria != estado_normalizado:
                 logger.info(f"Actualizando estado: {preregistro.estado_biometria} -> {estado_normalizado}")
                 
@@ -395,7 +466,7 @@ class EstadoBiometriaView(APIView):
                 preregistro.idcaso_biometria = resultado.get('idcaso')
                 preregistro.justificacion_biometria = resultado.get('justificacion')
                 
-                # Si fue aprobado, actualizar fecha y estado de vinculación
+                # Si fue aprobado, actualizar fecha y estado de vinculacion
                 if estado_normalizado == PreRegistro.BIOMETRIA_APROBADO:
                     preregistro.fecha_validacion_biometria = timezone.now()
                     preregistro.estado_vinculacion = PreRegistro.ESTADO_BIOMETRIA_OK
@@ -428,7 +499,7 @@ class EstadoBiometriaView(APIView):
             # Si hubo error consultando el proveedor
             error_msg = resultado.get('error', 'Error desconocido')
             
-            # Si el caso no se encuentra, es normal (aún no ha validado)
+            # Si el caso no se encuentra, es normal (aun no ha validado)
             if resultado.get('estado') in ['NO_ENCONTRADO', 'EN_PROCESO']:
                 logger.info(
                     "Consulta biometria sin resultado final (%s): %s",
@@ -444,7 +515,7 @@ class EstadoBiometriaView(APIView):
                     'estado_biometria': PreRegistro.BIOMETRIA_EN_PROCESO,
                     'puede_continuar': False,
                     'justificacion': '',
-                    'mensaje': 'Esperando validación biométrica. Por favor completa el proceso en la ventana del proveedor.'
+                    'mensaje': 'Esperando validacion biometrica. Por favor completa el proceso en la ventana del proveedor.'
                 })
 
             if resultado.get('estado') == 'NO_AUTORIZADO':
@@ -459,7 +530,7 @@ class EstadoBiometriaView(APIView):
 
             
             # Cualquier otro error
-            logger.error(f"Error consultando biometría: {error_msg}")
+            logger.error(f"Error consultando biometria: {error_msg}")
             if error_msg and 'IDCaso o DNI' in error_msg:
                 return Response(
                     {
@@ -635,19 +706,19 @@ class LinkLinixView(APIView):
     Genera el link de LINIX para que el usuario complete el formulario (Paso 3).
     
     Este endpoint:
-    1. Verifica que la biometría esté aprobada
-    2. Marca que el usuario está en proceso de LINIX
+    1. Verifica que la biometria esta aprobada
+    2. Marca que el usuario esta en proceso de LINIX
     3. Retorna el link completo
     
     Response 200:
         {
             "link_linix": "https://consulta.congente.coop/lnxPublico.php?...",
-            "mensaje": "Redirigiendo a formulario de vinculación"
+            "mensaje": "Redirigiendo a formulario de vinculacion"
         }
     
     Response 400:
         {
-            "error": "Debes completar la validación biométrica primero"
+            "error": "Debes completar la validacion biometrica primero"
         }
     """
     
@@ -655,7 +726,7 @@ class LinkLinixView(APIView):
     
     def get(self, request, pk):
         """
-        Maneja la petición GET para obtener el link de LINIX.
+        Maneja la peticion GET para obtener el link de LINIX.
         
         Args:
             request: Request de Django
@@ -672,29 +743,122 @@ class LinkLinixView(APIView):
         
         # Verificar que puede continuar
         if not preregistro.puede_continuar_a_linix():
-            logger.warning(f"Intento de acceder a LINIX sin biometría aprobada: {preregistro.numero_cedula}")
+            logger.warning(f"Intento de acceder a LINIX sin biometria aprobada: {preregistro.numero_cedula}")
             
             return Response(
                 {
-                    'error': 'Debes completar la validación biométrica exitosamente antes de continuar',
+                    'error': 'Debes completar la validacion biometrica exitosamente antes de continuar',
                     'estado_biometria': preregistro.estado_biometria
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        # Marcar que está iniciando proceso en LINIX
+        # Marcar que esta iniciando proceso en LINIX
         preregistro.marcar_inicio_linix()
         
         # Generar link
         serializer = PreRegistroDetailSerializer(preregistro)
         link_linix = serializer.data['link_linix']
         
-        logger.info(f"Link generado exitosamente para cédula: {preregistro.numero_cedula}")
+        logger.info(f"Link generado exitosamente para cedula: {preregistro.numero_cedula}")
         
         return Response({
             'link_linix': link_linix,
-            'mensaje': 'Por favor completa el formulario de vinculación en LINIX. Una vez termines, regresa a esta página.'
+            'mensaje': 'Por favor completa el formulario de vinculacion en LINIX. Una vez termines, regresa a esta pagina.'
         })
+
+
+class VinculacionAgilView(APIView):
+    """
+    POST /api/v1/vinculacion-agil/
+
+    Paso 3.2: recibe DTO reducido, construye trama completa y la envia al core LINIX.
+    """
+
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        serializer = VinculacionAgilSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        payload = serializer.validated_data
+
+        preregistro = get_object_or_404(PreRegistro, pk=payload["preregistroId"])
+
+        if preregistro.estado_biometria != PreRegistro.BIOMETRIA_APROBADO:
+            return Response(
+                {
+                    "error": "La biometria debe estar APROBADA para continuar con vinculacion agil.",
+                    "estado_biometria": preregistro.estado_biometria,
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if str(preregistro.numero_cedula) != str(payload["identificacion"]):
+            return Response(
+                {
+                    "error": "La identificacion no coincide con el pre-registro.",
+                    "preregistro": preregistro.numero_cedula,
+                },
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        if preregistro.estado_vinculacion not in [
+            PreRegistro.ESTADO_EN_LINIX,
+            PreRegistro.ESTADO_BIOMETRIA_OK,
+        ]:
+            preregistro.marcar_inicio_linix()
+
+        service = VinculacionAgilService()
+
+        try:
+            trama = service.build_trama(payload)
+            linix_result = service.send_linix_vinculacion(trama)
+        except VinculacionAgilError as exc:
+            message = str(exc)
+            preregistro.mensaje_error = message
+            preregistro.estado_vinculacion = PreRegistro.ESTADO_ERROR
+            preregistro.save(update_fields=["mensaje_error", "estado_vinculacion", "updated_at"])
+
+            LogIntegracion.objects.create(
+                preregistro=preregistro,
+                accion="VINCULACION_AGIL",
+                exitoso=False,
+                request_data={"payload": payload},
+                response_data={},
+                error_message=message,
+            )
+
+            return Response(
+                {
+                    "ok": False,
+                    "error": "No se pudo enviar la vinculacion agil al core.",
+                    "detalle": message,
+                },
+                status=status.HTTP_502_BAD_GATEWAY,
+            )
+
+        preregistro.mensaje_error = None
+        preregistro.estado_vinculacion = PreRegistro.ESTADO_EN_LINIX
+        preregistro.save(update_fields=["mensaje_error", "estado_vinculacion", "updated_at"])
+
+        LogIntegracion.objects.create(
+            preregistro=preregistro,
+            accion="VINCULACION_AGIL",
+            exitoso=True,
+            request_data={"payload": payload, "trama_preview": trama},
+            response_data=linix_result.get("response_data", {}),
+            error_message=None,
+        )
+
+        return Response(
+            {
+                "ok": True,
+                "mensaje": "Vinculacion agil enviada correctamente. Ahora puedes continuar al paso de verificacion final.",
+                "estado": "ENVIADO_A_LINIX",
+                "respuesta_linix": linix_result.get("response_data", {}),
+            },
+            status=status.HTTP_200_OK,
+        )
 
 
 class VerificarLinixView(APIView):
@@ -705,7 +869,7 @@ class VerificarLinixView(APIView):
     
     Este endpoint:
     1. Ejecuta procedimiento almacenado en Oracle
-    2. Verifica que el tercero exista y el flujo esté creado
+    2. Verifica que el tercero exista y el flujo esta creado
     3. Actualiza el estado del pre-registro
     4. Opcionalmente dispara webhook a n8n
     
@@ -713,14 +877,14 @@ class VerificarLinixView(APIView):
         {
             "completado": true,
             "id_tercero": "12345",
-            "mensaje": "¡Vinculación completada exitosamente!",
+            "mensaje": "Vinculacion completada exitosamente!",
             "datos_oracle": {...}
         }
     
     Response 404:
         {
             "completado": false,
-            "mensaje": "No se encontró el registro en LINIX. Por favor completa el formulario."
+            "mensaje": "No se encontro el registro en LINIX. Por favor completa el formulario."
         }
     
     Response 500:
@@ -733,41 +897,41 @@ class VerificarLinixView(APIView):
     
     def post(self, request, pk):
         """
-        Maneja la petición POST para verificar creación en LINIX.
+        Maneja la peticion POST para verificar creacion en LINIX.
         
         Args:
             request: Request de Django
             pk (int): ID del pre-registro
             
         Returns:
-            Response: JSON con el resultado de la verificación
+            Response: JSON con el resultado de la verificacion
         """
         
-        logger.info(f"=== Verificando creación en LINIX para pre-registro ID={pk} ===")
+        logger.info(f"=== Verificando creacion en LINIX para pre-registro ID={pk} ===")
         
         # Obtener pre-registro
         preregistro = get_object_or_404(PreRegistro, pk=pk)
         
-        # Verificar que esté en estado correcto
+        # Verificar que esta en estado correcto
         if preregistro.estado_vinculacion not in [
             PreRegistro.ESTADO_EN_LINIX,
             PreRegistro.ESTADO_BIOMETRIA_OK
         ]:
-            logger.warning(f"Intento de verificar en estado inválido: {preregistro.estado_vinculacion}")
+            logger.warning(f"Intento de verificar en estado invalido: {preregistro.estado_vinculacion}")
             
             return Response(
                 {
-                    'error': 'El estado actual no permite verificación',
+                    'error': 'El estado actual no permite verificacion',
                     'estado_actual': preregistro.estado_vinculacion
                 },
                 status=status.HTTP_400_BAD_REQUEST
             )
         
-        # Ejecutar verificación en Oracle
+        # Ejecutar verificacion en Oracle
         linix_service = LinixService()
         resultado = linix_service.verificar_flujo_vinculacion(preregistro.numero_cedula)
         
-        # Crear log de la integración
+        # Crear log de la integracion
         log = LogIntegracion.objects.create(
             preregistro=preregistro,
             accion=LogIntegracion.ACCION_VERIFICACION_ORACLE,
@@ -780,7 +944,7 @@ class VerificarLinixView(APIView):
         # Si la consulta a Oracle fue exitosa
         if resultado['exitoso']:
             
-            # Si se encontró el tercero
+            # Si se encontro el tercero
             if resultado['encontrado']:
                 id_tercero = resultado['id_tercero']
                 
@@ -798,19 +962,23 @@ class VerificarLinixView(APIView):
                 return Response({
                     'completado': True,
                     'id_tercero': id_tercero,
-                    'mensaje': '¡Vinculación completada exitosamente! Un asesor se contactará contigo pronto.',
+                    'mensaje': 'Vinculacion completada exitosamente! Un asesor se contactara contigo pronto.',
                     'datos_oracle': resultado.get('datos_completos')
                 })
-            
             else:
-                # No se encontró el registro en LINIX
-                logger.warning(f"No se encontró tercero en LINIX para cédula: {preregistro.numero_cedula}")
-                
+                # SP_FLUJOEXITOSO retorno PDTE (flujo pendiente o con novedad)
+                logger.warning(
+                    "Flujo pendiente en LINIX para cedula %s. Estado Oracle: %s",
+                    preregistro.numero_cedula,
+                    resultado.get('estado_flujo')
+                )
+
                 return Response({
                     'completado': False,
-                    'mensaje': 'No se encontró tu registro en LINIX. Por favor verifica que hayas completado el formulario correctamente.',
-                    'sugerencia': 'Si completaste el formulario hace menos de 5 minutos, espera un momento e intenta nuevamente.'
-                }, status=status.HTTP_404_NOT_FOUND)
+                    'estado_flujo': resultado.get('estado_flujo'),
+                    'mensaje': 'Tu solicitud sigue en validacion en LINIX. Intenta nuevamente en unos minutos.',
+                    'sugerencia': 'Si ya completaste el formulario, espera de 2 a 5 minutos y vuelve a verificar.'
+                }, status=status.HTTP_200_OK)
         
         else:
             # Error ejecutando el procedimiento
@@ -827,7 +995,7 @@ class VerificarLinixView(APIView):
     
     def _enviar_webhook_n8n(self, preregistro):
         """
-        Método privado para disparar webhook a n8n.
+        Metodo privado para disparar webhook a n8n.
         
         Args:
             preregistro (PreRegistro): Instancia del pre-registro
@@ -838,7 +1006,7 @@ class VerificarLinixView(APIView):
         webhook_url = getattr(settings, 'N8N_WEBHOOK_URL', None)
         
         if not webhook_url:
-            logger.warning("N8N_WEBHOOK_URL no está configurada. No se enviará el webhook.")
+            logger.warning("N8N_WEBHOOK_URL no esta configurada. No se enviara el webhook.")
             return
         
         try:
@@ -979,10 +1147,10 @@ class PreRegistroDetailView(APIView):
     
     Obtiene los detalles completos de un pre-registro.
     
-    Útil para:
+    Util para:
     - Debugging
-    - Dashboard de administración
-    - Recuperar estado después de refrescar página
+    - Dashboard de administracion
+    - Recuperar estado despues de refrescar pagina
     
     Response 200:
         {
@@ -999,7 +1167,7 @@ class PreRegistroDetailView(APIView):
     
     def get(self, request, pk):
         """
-        Maneja la petición GET para obtener detalles.
+        Maneja la peticion GET para obtener detalles.
         
         Args:
             request: Request de Django
@@ -1023,19 +1191,19 @@ class TestOracleConnectionView(APIView):
     """
     GET /api/v1/test/oracle/
     
-    Endpoint de utilidad para probar la conexión con Oracle.
+    Endpoint de utilidad para probar la conexion con Oracle.
     
-    ⚠️ IMPORTANTE: Eliminar o proteger en producción
+    IMPORTANTE: Eliminar o proteger en produccion
     """
     
     permission_classes = [AllowAny]
     
     def get(self, request):
         """
-        Prueba la conexión con Oracle.
+        Prueba la conexion con Oracle.
         
         Returns:
-            Response: Estado de la conexión
+            Response: Estado de la conexion
         """
         
         linix_service = LinixService()
@@ -1043,7 +1211,7 @@ class TestOracleConnectionView(APIView):
         if linix_service.test_connection():
             return Response({
                 'status': 'success',
-                'mensaje': 'Conexión con Oracle exitosa'
+                'mensaje': 'Conexion con Oracle exitosa'
             })
         else:
             return Response(
@@ -1053,3 +1221,6 @@ class TestOracleConnectionView(APIView):
                 },
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+
+

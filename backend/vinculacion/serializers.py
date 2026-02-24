@@ -299,3 +299,62 @@ class LogIntegracionSerializer(serializers.ModelSerializer):
             'created_at',
         ]
         read_only_fields = '__all__'
+
+
+class VinculacionAgilSerializer(serializers.Serializer):
+    """
+    DTO reducido para Paso 3 (vinculacion agil).
+    """
+
+    preregistroId = serializers.IntegerField(min_value=1)
+
+    tipoDocumento = serializers.CharField(max_length=5)
+    identificacion = serializers.CharField(max_length=30)
+    primerNombre = serializers.CharField(max_length=80)
+    segundoNombre = serializers.CharField(max_length=80, required=False, allow_blank=True)
+    primerApellido = serializers.CharField(max_length=80)
+    segundoApellido = serializers.CharField(max_length=80, required=False, allow_blank=True)
+    fechaNacimiento = serializers.DateField(input_formats=['%Y-%m-%d'])
+    genero = serializers.CharField(max_length=2)
+    estadoCivil = serializers.CharField(max_length=4)
+
+    email = serializers.EmailField(max_length=254)
+    celular = serializers.CharField(max_length=20)
+    telefono = serializers.CharField(max_length=20, required=False, allow_blank=True)
+    direccion = serializers.CharField(max_length=200)
+    barrio = serializers.CharField(max_length=120)
+    ciudad = serializers.CharField(max_length=10)
+
+    estrato = serializers.IntegerField(min_value=1, max_value=6)
+    tipoVivienda = serializers.CharField(max_length=4)
+    nivelEstudio = serializers.CharField(max_length=4)
+    actividadEconomica = serializers.CharField(max_length=8)
+    ocupacion = serializers.CharField(max_length=8)
+    actividadCIIU = serializers.CharField(max_length=8)
+    actividadCIIUSecundaria = serializers.CharField(max_length=8)
+    poblacionVulnerable = serializers.CharField(max_length=2)
+    publicamenteExpuesto = serializers.CharField(max_length=2)
+    personasCargo = serializers.IntegerField(min_value=0)
+    salario = serializers.DecimalField(max_digits=14, decimal_places=2, min_value=0)
+
+    operacionesMonedaExtranjera = serializers.CharField(max_length=2)
+    declaraRenta = serializers.CharField(max_length=2)
+    administraRecursosPublicos = serializers.CharField(max_length=2)
+    vinculadoRecursosPublicos = serializers.CharField(max_length=2)
+
+    sucursal = serializers.CharField(max_length=10)
+    fechaAfiliacion = serializers.DateField(input_formats=['%Y-%m-%d'])
+
+    def validate_identificacion(self, value):
+        cleaned = str(value).strip()
+        if not cleaned.isdigit():
+            raise serializers.ValidationError("La identificacion debe contener solo digitos.")
+        return cleaned
+
+    def validate_ciudad(self, value):
+        cleaned = str(value).strip()
+        if not cleaned.isdigit():
+            raise serializers.ValidationError("La ciudad debe ser codigo numerico.")
+        if len(cleaned) < 5:
+            raise serializers.ValidationError("La ciudad debe incluir codigo DANE de 5 digitos.")
+        return cleaned

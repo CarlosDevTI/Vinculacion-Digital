@@ -14,6 +14,7 @@ from .views import (
     DecrimTokenView,
     DecrimWebhookView,
     LinkLinixView,
+    VinculacionAgilView,
     VerificarLinixView,
     VerificarLinixPendientesView,
     PreRegistroDetailView,
@@ -43,6 +44,13 @@ urlpatterns = [
         'preregistro/<int:pk>/link-linix/',
         LinkLinixView.as_view(),
         name='preregistro-link-linix'
+    ),
+
+    # PASO 3.2: Vinculacion agil (trama -> API LINIX)
+    path(
+        'vinculacion-agil/',
+        VinculacionAgilView.as_view(),
+        name='vinculacion-agil'
     ),
     
     # PASO 4: Verificar creación en LINIX

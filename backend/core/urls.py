@@ -16,8 +16,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from vinculacion.views import VinculacionAgilView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/v1/', include('vinculacion.urls')),
+    path('api/vinculacion-agil/', VinculacionAgilView.as_view()),
 ]

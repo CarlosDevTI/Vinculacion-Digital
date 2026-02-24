@@ -1,10 +1,10 @@
 # vinculacion/services/linix_service.py
 
 """
-SERVICIO DE INTEGRACIÓN CON ORACLE/LINIX
+SERVICIO DE INTEGRACION CON ORACLE/LINIX
 =========================================
-Maneja la conexión con la base de datos Oracle
-y la ejecución de procedimientos almacenados.
+Maneja la conexion con la base de datos Oracle
+y la ejecucion de procedimientos almacenados.
 """
 
 import oracledb
@@ -21,8 +21,8 @@ class LinixService:
     Servicio para interactuar con la base de datos Oracle de LINIX.
     
     Este servicio encapsula:
-    - Conexión a Oracle
-    - Ejecución de procedimientos almacenados
+    - Conexion a Oracle
+    - Ejecucion de procedimientos almacenados
     - Manejo de errores de BD
     """
     
@@ -30,13 +30,13 @@ class LinixService:
         """
         Constructor del servicio.
         
-        Inicializa los parámetros de conexión desde settings.py
+        Inicializa los parametros de conexion desde settings.py
         """
         self.oracle_user = getattr(settings, 'ORACLE_USER', '')
         self.oracle_password = getattr(settings, 'ORACLE_PASSWORD', '')
         self.oracle_dsn = getattr(settings, 'ORACLE_DSN', '')  # host:port/service_name
         
-        # Configuración de encoding
+        # Configuracion de encoding
     
     @contextmanager
     def get_connection(self):
@@ -49,23 +49,23 @@ class LinixService:
                 # hacer operaciones
         
         Ventajas del context manager:
-        - Cierra automáticamente la conexión al salir
+        - Cierra automaticamente la conexion al salir
         - Maneja errores correctamente
-        - Más limpio y seguro
+        - Mas limpio y seguro
         
         Yields:
-            oracledb.Connection: Conexión activa a Oracle
+            oracledb.Connection: Conexion activa a Oracle
         """
         connection = None
         try:
-            # Establecer conexión
-            logger.debug("Estableciendo conexión con Oracle...")
+            # Establecer conexion
+            logger.debug("Estableciendo conexion con Oracle...")
             connection = oracledb.connect(
                 user=self.oracle_user,
                 password=self.oracle_password,
                 dsn=self.oracle_dsn
             )
-            logger.debug("Conexión establecida exitosamente")
+            logger.debug("Conexion establecida exitosamente")
             
             yield connection
             
@@ -75,108 +75,121 @@ class LinixService:
             raise
         
         finally:
-            # Cerrar conexión siempre, incluso si hay error
+            # Cerrar conexion siempre, incluso si hay error
             if connection:
                 connection.close()
-                logger.debug("Conexión cerrada")
+                logger.debug("Conexion cerrada")
     
     def verificar_flujo_vinculacion(self, numero_cedula):
         """
-        Verifica si se creó exitosamente el flujo de vinculación en LINIX.
-        
-        Este método ejecuta un procedimiento almacenado en Oracle que:
-        1. Busca el tercero por número de cédula
-        2. Verifica que el flujo se haya creado correctamente
-        3. Retorna el ID del tercero y estado
-        
+        Verifica si se creo exitosamente el flujo de vinculacion en LINIX.
+
+        Este metodo ejecuta SP_FLUJOEXITOSO(cedula), donde:
+        - OK: el flujo se creo correctamente
+        - PDTE: el flujo no se creo aun o presenta alguna novedad
+
         Args:
-            numero_cedula (str): Cédula del usuario a verificar
-            
+            numero_cedula (str): Cedula del usuario a verificar
+
         Returns:
-            dict: Resultado de la verificación:
-                {
-                    'exitoso': bool,
-                    'encontrado': bool,
-                    'id_tercero': str,
-                    'estado_flujo': str,
-                    'datos_completos': dict,
-                    'error': str (solo si exitoso=False)
-                }
-        
-        Example:
-            >>> service = LinixService()
-            >>> resultado = service.verificar_flujo_vinculacion('123456789')
-            >>> if resultado['exitoso'] and resultado['encontrado']:
-            >>>     print(f"ID Tercero: {resultado['id_tercero']}")
+            dict: Resultado de la verificacion
         """
-        
-        logger.info(f"Verificando flujo de vinculación para cédula: {numero_cedula}")
-        
+
+        logger.info(f"Verificando flujo de vinculacion para cedula: {numero_cedula}")
+        dry_run = bool(getattr(settings, 'LINIX_VERIFICACION_DRY_RUN', False) and settings.DEBUG)
+        if dry_run:
+            return {
+                'exitoso': True,
+                'encontrado': True,
+                'id_tercero': f"DRY-{numero_cedula}",
+                'estado_flujo': 'OK',
+                'mensaje': 'Flujo confirmado en modo de prueba local.',
+                'datos_completos': {
+                    'procedimiento': 'SP_FLUJOEXITOSO',
+                    'cedula': str(numero_cedula),
+                    'estado': 'OK',
+                    'id_tercero': f"DRY-{numero_cedula}",
+                    'dry_run': True,
+                }
+            }
+
         try:
             with self.get_connection() as connection:
                 cursor = connection.cursor()
-                
-                # Variables para recibir los valores de salida del procedimiento
-                # Ajustar según los parámetros reales de tu procedimiento
-                
-                # OUT parameters
-                out_id_tercero = cursor.var(oracledb.DB_TYPE_VARCHAR)
+
+                proc_name = "SP_FLUJOEXITOSO"
                 out_estado = cursor.var(oracledb.DB_TYPE_VARCHAR)
-                out_mensaje = cursor.var(oracledb.DB_TYPE_VARCHAR)
-                out_existe = cursor.var(oracledb.DB_TYPE_NUMBER)
-                
-                # TODO: Reemplazar con el nombre real de tu procedimiento
-                # Ejemplo: PKG_VINCULACION.VERIFICAR_FLUJO(?)
-                proc_name = "PKG_VINCULACION.VERIFICAR_FLUJO_CREADO"
-                
-                # Ejecutar procedimiento almacenado
-                # Sintaxis: cursor.callproc(nombre, [parametros])
-                cursor.callproc(
-                    proc_name,
-                    [
-                        numero_cedula,        # IN: Cédula a buscar
-                        out_id_tercero,       # OUT: ID del tercero
-                        out_estado,           # OUT: Estado del flujo
-                        out_existe,           # OUT: 1 si existe, 0 si no
-                        out_mensaje           # OUT: Mensaje descriptivo
-                    ]
+                cursor.callproc(proc_name, [str(numero_cedula), out_estado])
+                estado_raw = out_estado.getvalue()
+
+                estado = str(estado_raw).strip().upper() if estado_raw is not None else ""
+
+                if estado not in {"OK", "PDTE"}:
+                    cursor.close()
+                    logger.error(
+                        "Respuesta inesperada en %s para cedula %s: %s",
+                        proc_name,
+                        numero_cedula,
+                        estado_raw
+                    )
+                    return {
+                        'exitoso': False,
+                        'error': (
+                            f'Respuesta inesperada de {proc_name}: '
+                            f'{estado_raw!r}'
+                        ),
+                        'datos_completos': {
+                            'procedimiento': proc_name,
+                            'cedula': str(numero_cedula),
+                            'estado': estado,
+                            'estado_raw': estado_raw
+                        }
+                    }
+
+                encontrado = estado == "OK"
+                mensaje = (
+                    "Flujo confirmado en LINIX."
+                    if encontrado
+                    else "Flujo pendiente en LINIX o con novedad (PDTE)."
                 )
-                
-                # Extraer valores de salida
-                existe = out_existe.getvalue()
-                id_tercero = out_id_tercero.getvalue()
-                estado = out_estado.getvalue()
-                mensaje = out_mensaje.getvalue()
-                
+                # En este flujo solo se consulta el SP; no se hace SELECT adicional.
+                id_tercero = None
+
                 cursor.close()
-                
-                # Registrar resultado
-                logger.info(f"Verificación completada: Existe={existe}, ID={id_tercero}")
-                
+
+                logger.info(
+                    "Verificacion %s completada para cedula %s: estado=%s, id_tercero=%s",
+                    proc_name,
+                    numero_cedula,
+                    estado,
+                    id_tercero
+                )
+
                 return {
                     'exitoso': True,
-                    'encontrado': existe == 1,
-                    'id_tercero': id_tercero if existe == 1 else None,
+                    'encontrado': encontrado,
+                    'id_tercero': id_tercero,
                     'estado_flujo': estado,
                     'mensaje': mensaje,
                     'datos_completos': {
-                        'existe': existe,
-                        'id_tercero': id_tercero,
+                        'procedimiento': proc_name,
+                        'cedula': str(numero_cedula),
                         'estado': estado,
+                        'id_tercero': id_tercero,
                         'mensaje': mensaje
                     }
                 }
-        
+
         except oracledb.DatabaseError as e:
             error, = e.args
-            logger.error(f"Error ejecutando procedimiento: {error.message}")
+            logger.error(f"Error ejecutando procedimiento SP_FLUJOEXITOSO: {error.message}")
             return {
                 'exitoso': False,
                 'error': f'Error de base de datos: {error.message}'
             }
-        
+
         except Exception as e:
-            logger.exception(f"Error inesperado en verificación: {str(e)}")
+            logger.exception(f"Error inesperado en verificacion: {str(e)}")
             return {
                 'exitoso': False,
                 'error': f'Error inesperado: {str(e)}'
@@ -187,8 +200,8 @@ class LinixService:
         Ejecuta SP_CONSULTACTU para validar si el ciudadano ya es asociado.
 
         Args:
-            numero_cedula (str): Cédula del ciudadano
-            fecha_expedicion (str): Fecha de expedición en formato DD/MM/YYYY
+            numero_cedula (str): Cedula del ciudadano
+            fecha_expedicion (str): Fecha de expedicion en formato DD/MM/YYYY
 
         Returns:
             dict: {
@@ -197,7 +210,7 @@ class LinixService:
                 'error': str (solo si exitoso=False)
             }
         """
-        logger.info(f"Consultando SP_CONSULTACTU para cédula: {numero_cedula}")
+        logger.info(f"Consultando SP_CONSULTACTU para cedula: {numero_cedula}")
 
         try:
             with self.get_connection() as connection:
@@ -246,23 +259,23 @@ class LinixService:
         """
         Consulta directa a la tabla gr_tercero para obtener datos del tercero.
         
-        Este método es opcional, por si necesitas hacer consultas SQL directas
+        Este metodo es opcional, por si necesitas hacer consultas SQL directas
         en lugar de usar procedimientos almacenados.
         
         Args:
-            numero_cedula (str): Cédula a buscar
+            numero_cedula (str): Cedula a buscar
             
         Returns:
             dict: Datos del tercero o None si no existe
         """
         
-        logger.info(f"Consultando tercero por cédula: {numero_cedula}")
+        logger.info(f"Consultando tercero por cedula: {numero_cedula}")
         
         try:
             with self.get_connection() as connection:
                 cursor = connection.cursor()
                 
-                # TODO: Ajustar nombre de tabla y columnas según tu esquema
+                # TODO: Ajustar nombre de tabla y columnas segun tu esquema
                 query = """
                     SELECT 
                         ID_TERCERO,
@@ -293,7 +306,7 @@ class LinixService:
                     logger.info(f"Tercero encontrado: ID={resultado['ID_TERCERO']}")
                     return resultado
                 else:
-                    logger.info(f"No se encontró tercero con cédula: {numero_cedula}")
+                    logger.info(f"No se encontro tercero con cedula: {numero_cedula}")
                     return None
         
         except oracledb.DatabaseError as e:
@@ -307,10 +320,10 @@ class LinixService:
     
     def test_connection(self):
         """
-        Método de utilidad para probar la conexión a Oracle.
+        Metodo de utilidad para probar la conexion a Oracle.
         
         Returns:
-            bool: True si la conexión fue exitosa
+            bool: True si la conexion fue exitosa
         """
         try:
             with self.get_connection() as connection:
@@ -319,9 +332,12 @@ class LinixService:
                 result = cursor.fetchone()
                 cursor.close()
                 
-                logger.info("Test de conexión exitoso")
+                logger.info("Test de conexion exitoso")
                 return True
         
         except Exception as e:
-            logger.error(f"Test de conexión falló: {str(e)}")
+            logger.error(f"Test de conexion fallo: {str(e)}")
             return False
+
+
+

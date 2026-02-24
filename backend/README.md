@@ -22,11 +22,15 @@ Esta carpeta contiene el backend en Django/DRF para el flujo de vinculacion digi
 3) Link LINIX (Paso 3)
 - Endpoint: `GET /api/v1/preregistro/{id}/link-linix/`
 - Se habilita cuando la biometria esta aprobada.
+- Endpoint adicional Paso 3.2: `POST /api/v1/vinculacion-agil/`
+  - Recibe DTO reducido del front.
+  - Construye trama completa en backend.
+  - Solicita token a LINIX y envia la vinculacion por API.
 
 4) Verificacion LINIX / Oracle (Paso 4)
 - Endpoint: `POST /api/v1/preregistro/{id}/verificar-linix/`
-- Ejecuta procedimiento en Oracle para confirmar creacion del tercero.
-- Si existe, marca completado (y opcionalmente dispara webhook N8N si esta configurado).
+- Ejecuta `SP_FLUJOEXITOSO(cedula)` en Oracle para confirmar el resultado del flujo (`OK` o `PDTE`).
+- Si retorna `OK`, marca completado (y opcionalmente dispara webhook N8N si esta configurado). Si retorna `PDTE`, mantiene el flujo pendiente.
 
 5) Verificacion periodica LINIX / Oracle (Paso 5)
 - Endpoint: `POST /api/v1/linix/verificar-pendientes/`
@@ -62,6 +66,14 @@ curl http://127.0.0.1:8000/api/v1/preregistro/1/estado-biometria/
 
 ```bash
 curl http://127.0.0.1:8000/api/v1/preregistro/1/link-linix/
+```
+
+### Paso 3.2 - Vinculacion agil (API LINIX)
+
+```bash
+curl -X POST http://127.0.0.1:8000/api/v1/vinculacion-agil/ \
+  -H "Content-Type: application/json" \
+  -d '{"preregistroId":1,"tipoDocumento":"C","identificacion":"1006442327","primerNombre":"LUIS","primerApellido":"GARCIA","fechaNacimiento":"1995-01-15","genero":"M","estadoCivil":"S","email":"luis@email.com","celular":"3001234567","direccion":"CALLE 1 # 2-3","barrio":"CENTRO","ciudad":"11001","estrato":3,"tipoVivienda":"P","nivelEstudio":"U","actividadEconomica":"EM","ocupacion":"1","actividadCIIU":"0122","actividadCIIUSecundaria":"0121","poblacionVulnerable":"N","publicamenteExpuesto":"N","personasCargo":0,"salario":"2500000","operacionesMonedaExtranjera":"N","declaraRenta":"N","administraRecursosPublicos":"N","vinculadoRecursosPublicos":"N","sucursal":"102","fechaAfiliacion":"2026-04-02"}'
 ```
 
 ### Paso 4 - Verificar LINIX
@@ -118,7 +130,7 @@ En `backend/vinculacion/views.py`, clase `IniciarPreRegistroView`:
 2) Oracle
 - `backend/vinculacion/services/linix_services.py`
   - Metodo `consultar_actu()` (SP_CONSULTACTU)
-  - Metodo `verificar_flujo_vinculacion()` (procedimiento LINIX)
+  - Metodo `verificar_flujo_vinculacion()` (`SP_FLUJOEXITOSO`)
 
 3) LINIX link
 - `backend/vinculacion/serializers.py`
@@ -135,6 +147,19 @@ Para produccion (PostgreSQL + Oracle + DECRIM), configurar:
 - `ORACLE_USER`, `ORACLE_PASSWORD`, `ORACLE_DSN`
 - `DECRIM_API_URL`, `DECRIM_USERNAME`, `DECRIM_PASSWORD`
  - `DB_ENGINE`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT`
+
+### Variables de pruebas locales (dry-run)
+
+Solo aplican si `DEBUG=True`:
+
+- `DEV_SKIP_DECRIM=true`  
+  Omite la creacion real del caso en DECRIM durante Paso 1.
+- `DEV_BIOMETRIA_AUTO_APPROVE=true`  
+  Auto-aprueba biometria para avanzar al Paso 3.
+- `LINIX_DRY_RUN=true`  
+  Simula el envio de vinculacion agil al core LINIX (Paso 3.2).
+- `LINIX_VERIFICACION_DRY_RUN=true`  
+  Simula `SP_FLUJOEXITOSO=OK` en Paso 4.
 
 ### URLs de prueba
 
@@ -159,3 +184,4 @@ Para produccion (PostgreSQL + Oracle + DECRIM), configurar:
 
 - El webhook de DECRIM esta implementado, pero es opcional y solo aplica si
   DECRIM envia notificaciones en tiempo real.
+

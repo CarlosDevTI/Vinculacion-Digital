@@ -87,6 +87,37 @@ DECRIM_PASSWORD = os.environ.get(
     os.environ.get('PASSWORD_DECRIM', '')
 )
 MAX_INTENTOS_BIOMETRIA = int(os.environ.get('MAX_INTENTOS_BIOMETRIA', '2'))
+DEV_SKIP_DECRIM = os.environ.get('DEV_SKIP_DECRIM', 'False').lower() == 'true'
+DEV_BIOMETRIA_AUTO_APPROVE = os.environ.get('DEV_BIOMETRIA_AUTO_APPROVE', 'False').lower() == 'true'
+
+# LINIX API (Vinculacion agil - Paso 3)
+LINIX_API_BASE_URL = os.environ.get('LINIX_API_BASE_URL', 'http://consulta.congente.coop:8041')
+LINIX_TOKEN_URL = os.environ.get('LINIX_TOKEN_URL', '')
+LINIX_VINCULACION_URL = os.environ.get('LINIX_VINCULACION_URL', '')
+LINIX_TOKEN_PATH = os.environ.get('LINIX_TOKEN_PATH', '/api/v1/incluirtec/token/')
+LINIX_VINCULACION_PATH = os.environ.get('LINIX_VINCULACION_PATH', '/api/v1/incluirtec/radicarAfiliacion/')
+LINIX_CLIENT_ID = os.environ.get('LINIX_CLIENT_ID', '')
+LINIX_CLIENT_SECRET = os.environ.get('LINIX_CLIENT_SECRET', '')
+LINIX_TIMEOUT = int(os.environ.get('LINIX_TIMEOUT', '30'))
+LINIX_TOKEN_CACHE_KEY = os.environ.get('LINIX_TOKEN_CACHE_KEY', 'linix_access_token')
+LINIX_TOKEN_CACHE_SAFETY_SECONDS = int(os.environ.get('LINIX_TOKEN_CACHE_SAFETY_SECONDS', '60'))
+LINIX_DEFAULT_COUNTRY_CODE = os.environ.get('LINIX_DEFAULT_COUNTRY_CODE', '169')
+LINIX_DEFAULT_AUTORETENEDOR = os.environ.get('LINIX_DEFAULT_AUTORETENEDOR', 'N')
+LINIX_DEFAULT_TIPO_CON = os.environ.get('LINIX_DEFAULT_TIPO_CON', 'D')
+LINIX_DEFAULT_TIPO_CUENTA = os.environ.get('LINIX_DEFAULT_TIPO_CUENTA', 'A')
+LINIX_DEFAULT_VALOR_FACTOR = os.environ.get('LINIX_DEFAULT_VALOR_FACTOR', '1')
+LINIX_DRY_RUN = os.environ.get('LINIX_DRY_RUN', 'False').lower() == 'true'
+LINIX_VERIFICACION_DRY_RUN = os.environ.get('LINIX_VERIFICACION_DRY_RUN', 'False').lower() == 'true'
+LINIX_CATALOG_DEFAULTS = {
+    'A_UBICACION_UNO': os.environ.get('LINIX_A_UBICACION_UNO', '1'),
+    'A_UBICACION_DOS': os.environ.get('LINIX_A_UBICACION_DOS', '1'),
+    'A_SECCION': os.environ.get('LINIX_A_SECCION', '1'),
+    'A_CENCOS': os.environ.get('LINIX_A_CENCOS', '1'),
+    'A_CARGO': os.environ.get('LINIX_A_CARGO', '1'),
+    'A_DEPENDENCIA': os.environ.get('LINIX_A_DEPENDENCIA', '1'),
+    'A_ESTADO_LABORAL': os.environ.get('LINIX_A_ESTADO_LABORAL', 'A'),
+    'A_TIPO_CONTRATO': os.environ.get('LINIX_A_TIPO_CONTRATO', '01'),
+}
 
 ORACLE_USER = os.environ.get('ORACLE_USER', os.environ.get('ORACLE_DB_USER', ''))
 ORACLE_PASSWORD = os.environ.get('ORACLE_PASSWORD', os.environ.get('ORACLE_DB_PASSWORD', ''))
