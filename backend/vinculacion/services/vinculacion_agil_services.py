@@ -33,6 +33,8 @@ class VinculacionAgilService:
         self.client_id = getattr(settings, "LINIX_CLIENT_ID", "")
         self.client_secret = getattr(settings, "LINIX_CLIENT_SECRET", "")
         self.timeout = int(getattr(settings, "LINIX_TIMEOUT", 30))
+        self.verify_ssl = bool(getattr(settings, "LINIX_VERIFY_SSL", True))
+        self.ca_bundle = str(getattr(settings, "LINIX_CA_BUNDLE", "") or "").strip() or None
         self.token_cache_key = getattr(settings, "LINIX_TOKEN_CACHE_KEY", "linix_access_token")
         self.token_safety_seconds = int(getattr(settings, "LINIX_TOKEN_CACHE_SAFETY_SECONDS", 60))
         self.country_code_default = str(getattr(settings, "LINIX_DEFAULT_COUNTRY_CODE", "169"))
@@ -40,8 +42,10 @@ class VinculacionAgilService:
         self.tipo_con_default = str(getattr(settings, "LINIX_DEFAULT_TIPO_CON", "D"))
         self.tipo_cuenta_default = str(getattr(settings, "LINIX_DEFAULT_TIPO_CUENTA", "A"))
         self.valor_factor_default = str(getattr(settings, "LINIX_DEFAULT_VALOR_FACTOR", "1"))
+        self.nit_default = str(getattr(settings, "LINIX_NIT_DEFAULT", "") or "").strip()
         self.catalog_defaults = getattr(settings, "LINIX_CATALOG_DEFAULTS", {})
         self.linix_dry_run = bool(getattr(settings, "LINIX_DRY_RUN", False) and settings.DEBUG)
+        self.request_verify = self.ca_bundle if self.ca_bundle else self.verify_ssl
 
     def _build_url(self, path):
         return urljoin(self.base_url.rstrip("/") + "/", str(path).lstrip("/"))
@@ -76,8 +80,14 @@ class VinculacionAgilService:
         """
         fecha_afiliacion = self._string_date(data["fechaAfiliacion"])
         dept_code, country_code = self._derive_geo_codes(data["ciudad"])
+        identificacion = str(data["identificacion"]).strip()
+        nit_asociado = self.nit_default or identificacion
 
         trama = {
+            # Algunos despliegues de LINIX requieren este campo fuera del bloque A_*
+            "nit": nit_asociado,
+            "Nit": nit_asociado,
+            "NIT": nit_asociado,
             "A_ACTIVO": "Y",
             "A_ASOCON": "1",
             "A_AUTORETENEDOR": self.autoretenedor_default,
@@ -90,7 +100,7 @@ class VinculacionAgilService:
             "A_TIPO_CON": self.tipo_con_default,
             "A_TIPO_CUENTA": self.tipo_cuenta_default,
             "A_TIPO_DOC": str(data["tipoDocumento"]),
-            "A_CODIGO_CLIENTE": str(data["identificacion"]),
+            "A_CODIGO_CLIENTE": identificacion,
             "F_NACIMIENTO": self._string_date(data["fechaNacimiento"]),
             "A_PRIMER_NOMBRE": str(data["primerNombre"]).strip().upper(),
             "A_SEGUNDO_NOMBRE": str(data.get("segundoNombre") or "").strip().upper(),
@@ -176,7 +186,23 @@ class VinculacionAgilService:
             "client_secret": self.client_secret,
         }
         logger.info("Solicitando token LINIX a %s", token_url)
-        response = requests.post(token_url, json=payload, timeout=self.timeout)
+        try:
+            response = requests.post(
+                token_url,
+                json=payload,
+                timeout=self.timeout,
+                verify=self.request_verify,
+            )
+        except requests.exceptions.SSLError as exc:
+            raise VinculacionAgilError(
+                "Error SSL al solicitar token LINIX. "
+                "Verifica el certificado del servidor o configura LINIX_CA_BUNDLE. "
+                "Solo para pruebas internas: LINIX_VERIFY_SSL=false."
+            ) from exc
+        except requests.exceptions.RequestException as exc:
+            raise VinculacionAgilError(
+                f"No fue posible conectar con LINIX token endpoint: {exc}"
+            ) from exc
 
         try:
             data = response.json() if response.content else {}
@@ -222,16 +248,28 @@ class VinculacionAgilService:
         token = self.get_linix_token()
 
         def _do_request(current_token):
-            return requests.post(
-                vinc_url,
-                json=payload,
-                headers={
-                    "Authorization": f"Bearer {current_token}",
-                    "Content-Type": "application/json",
-                    "Accept": "application/json",
-                },
-                timeout=self.timeout,
-            )
+            try:
+                return requests.post(
+                    vinc_url,
+                    json=payload,
+                    headers={
+                        "Authorization": f"Bearer {current_token}",
+                        "Content-Type": "application/json",
+                        "Accept": "application/json",
+                    },
+                    timeout=self.timeout,
+                    verify=self.request_verify,
+                )
+            except requests.exceptions.SSLError as exc:
+                raise VinculacionAgilError(
+                    "Error SSL al enviar vinculacion a LINIX. "
+                    "Verifica el certificado del servidor o configura LINIX_CA_BUNDLE. "
+                    "Solo para pruebas internas: LINIX_VERIFY_SSL=false."
+                ) from exc
+            except requests.exceptions.RequestException as exc:
+                raise VinculacionAgilError(
+                    f"No fue posible conectar con LINIX vinculacion endpoint: {exc}"
+                ) from exc
 
         response = _do_request(token)
         if response.status_code in {401, 403}:
