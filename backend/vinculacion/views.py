@@ -25,6 +25,7 @@ import hmac
 import json
 import time
 import logging
+from django.core.serializers.json import DjangoJSONEncoder
 
 from .models import PreRegistro, LogIntegracion
 from .serializers import (
@@ -38,6 +39,13 @@ from .services import BiometriaService, LinixService, VinculacionAgilService, Vi
 
 # Configurar logger
 logger = logging.getLogger(__name__)
+
+
+def _json_safe(data):
+    """
+    Convierte estructuras Python (incluyendo date/datetime) a JSON serializable.
+    """
+    return json.loads(json.dumps(data, cls=DjangoJSONEncoder))
 
 
 def _b64url_encode(data):
@@ -781,6 +789,7 @@ class VinculacionAgilView(APIView):
         serializer = VinculacionAgilSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         payload = serializer.validated_data
+        payload_safe = _json_safe(payload)
 
         preregistro = get_object_or_404(PreRegistro, pk=payload["preregistroId"])
 
@@ -823,7 +832,7 @@ class VinculacionAgilView(APIView):
                 preregistro=preregistro,
                 accion="VINCULACION_AGIL",
                 exitoso=False,
-                request_data={"payload": payload},
+                request_data={"payload": payload_safe},
                 response_data={},
                 error_message=message,
             )
@@ -845,8 +854,8 @@ class VinculacionAgilView(APIView):
             preregistro=preregistro,
             accion="VINCULACION_AGIL",
             exitoso=True,
-            request_data={"payload": payload, "trama_preview": trama},
-            response_data=linix_result.get("response_data", {}),
+            request_data={"payload": payload_safe, "trama_preview": _json_safe(trama)},
+            response_data=_json_safe(linix_result.get("response_data", {})),
             error_message=None,
         )
 

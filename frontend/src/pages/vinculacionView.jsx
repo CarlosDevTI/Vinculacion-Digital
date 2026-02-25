@@ -1,10 +1,138 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { CheckCircle, AlertCircle, Loader2, UserCheck, ExternalLink, Building2, X } from 'lucide-react';
 import logo from '../assets/LogoHD.png';
 import whatsappIcon from '../assets/whatsapp.svg';
 import facebookIcon from '../assets/facebook.svg';
 import tiktokIcon from '../assets/tiktok.svg';
 import youtubeIcon from '../assets/youtube.svg';
+import departmentsCatalog from '../data/departments.json';
+import citiesCatalog from '../data/cities.json';
+import ciiuCatalog from '../data/ciiu.json';
+
+const parseNombreCompleto = (nombreCompleto) => {
+  const partes = String(nombreCompleto || '')
+    .trim()
+    .toUpperCase()
+    .split(/\s+/)
+    .filter(Boolean);
+
+  if (partes.length === 0) {
+    return { primerNombre: '', segundoNombre: '', primerApellido: '', segundoApellido: '' };
+  }
+  if (partes.length === 1) {
+    return { primerNombre: partes[0], segundoNombre: '', primerApellido: '', segundoApellido: '' };
+  }
+  if (partes.length === 2) {
+    return { primerNombre: partes[0], segundoNombre: '', primerApellido: partes[1], segundoApellido: '' };
+  }
+  if (partes.length === 3) {
+    return { primerNombre: partes[0], segundoNombre: '', primerApellido: partes[1], segundoApellido: partes[2] };
+  }
+  return {
+    primerNombre: partes[0],
+    segundoNombre: partes[1],
+    primerApellido: partes[2],
+    segundoApellido: partes.slice(3).join(' '),
+  };
+};
+
+const COP_FORMATTER = new Intl.NumberFormat('es-CO');
+const EMAIL_WITH_DOMAIN_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+const CiiuAutocompleteField = ({
+  id,
+  label,
+  value,
+  onSelect,
+  options,
+  placeholder,
+  className = '',
+}) => {
+  const [query, setQuery] = useState('');
+  const [open, setOpen] = useState(false);
+
+  const selectedOption = useMemo(
+    () => options.find((option) => option.code === String(value || '')),
+    [options, value],
+  );
+
+  useEffect(() => {
+    if (selectedOption) {
+      setQuery(`${selectedOption.code} - ${selectedOption.description}`);
+      return;
+    }
+    if (!open) {
+      setQuery('');
+    }
+  }, [selectedOption, open]);
+
+  const filteredOptions = useMemo(() => {
+    const search = String(query || '').trim().toUpperCase();
+    if (!search) {
+      return options;
+    }
+    return options.filter((option) => option.searchText.includes(search));
+  }, [options, query]);
+
+  const handleSelect = (option) => {
+    onSelect(option.code);
+    setQuery(`${option.code} - ${option.description}`);
+    setOpen(false);
+  };
+
+  const handleChange = (event) => {
+    const next = String(event.target.value || '').toUpperCase();
+    setQuery(next);
+    onSelect('');
+    setOpen(true);
+  };
+
+  const handleBlur = () => {
+    setTimeout(() => setOpen(false), 120);
+  };
+
+  return (
+    <div className={`relative ${className}`}>
+      <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-1">
+        {label}
+      </label>
+      <input
+        id={id}
+        type="text"
+        value={query}
+        onChange={handleChange}
+        onFocus={() => setOpen(true)}
+        onBlur={handleBlur}
+        placeholder={placeholder}
+        className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+        autoComplete="off"
+      />
+
+      {open && (
+        <div className="absolute z-40 mt-1 w-full max-h-64 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg">
+          {filteredOptions.length > 0 ? (
+            filteredOptions.map((option) => (
+              <button
+                key={`${id}-${option.code}`}
+                type="button"
+                className="w-full px-3 py-2 text-left text-sm hover:bg-gray-100"
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={() => handleSelect(option)}
+              >
+                <span className="font-semibold">{option.code}</span>
+                <span className="text-gray-600"> - {option.description}</span>
+              </button>
+            ))
+          ) : (
+            <div className="px-3 py-2 text-sm text-gray-500">
+              Sin resultados. Intenta con otra palabra.
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
 
 const VinculacionDigital = () => {
   const [paso, setPaso] = useState(1);
@@ -18,13 +146,13 @@ const VinculacionDigital = () => {
   });
   const [estadoBiometria, setEstadoBiometria] = useState('PENDIENTE');
   const [loading, setLoading] = useState(false);
-  const [notification, setNotification] = useState({ message: '', show: false });
+  const [notification, setNotification] = useState({ message: '', show: false, type: 'error' });
   const [modal, setModal] = useState({ show: false, title: '', message: '' });
-  const [linkLinix, setLinkLinix] = useState('');
   const [linkBiometria, setLinkBiometria] = useState('');
   const [verificacionFinalizada, setVerificacionFinalizada] = useState(false);
   const [vincAgilEnviada, setVincAgilEnviada] = useState(false);
   const [vincAgilLoading, setVincAgilLoading] = useState(false);
+  const [ultimoEnvioLinix, setUltimoEnvioLinix] = useState(null);
   const [vinculacionAgil, setVinculacionAgil] = useState({
     tipoDocumento: 'C',
     identificacion: '',
@@ -47,7 +175,7 @@ const VinculacionDigital = () => {
     actividadEconomica: 'EM',
     ocupacion: '1',
     actividadCIIU: '',
-    actividadCIIUSecundaria: '',
+    actividadCIIUSecundaria: '000',
     poblacionVulnerable: 'N',
     publicamenteExpuesto: 'N',
     personasCargo: 0,
@@ -63,6 +191,7 @@ const VinculacionDigital = () => {
     mensaje: '',
     justificacion: ''
   });
+  const [departamentoDane, setDepartamentoDane] = useState('');
 
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
   
@@ -80,13 +209,13 @@ const VinculacionDigital = () => {
     { key: "GRANADA", nombre: "Granada" },
     { key: "GUAYABETAL", nombre: "Guayabetal" },
     { key: "BARRANCA", nombre: "Barranca" },
-    { key: "PUERTO_GAITAN", nombre: "Puerto Gait??n" },
+    { key: "PUERTO_GAITAN", nombre: "Puerto Gaitan" },
     { key: "CABUYARO", nombre: "Cabuyaro" },
     { key: "VISTAHERMOSA", nombre: "Vistahermosa" },
-    { key: "PUERTO_LOPEZ", nombre: "Puerto L??pez" },
+    { key: "PUERTO_LOPEZ", nombre: "Puerto Lopez" },
     { key: "EL_CASTILLO", nombre: "El Castillo" },
     { key: "CUMARAL", nombre: "Cumaral" },
-    { key: "LEJANIAS", nombre: "Lejan??as" },
+    { key: "LEJANIAS", nombre: "Lejanias" },
     { key: "MESETAS", nombre: "Mesetas" },
     { key: "PUERTO_RICO", nombre: "Puerto Rico" },
     { key: "PUERTO_LLERAS", nombre: "Puerto Lleras" },
@@ -116,6 +245,41 @@ const VinculacionDigital = () => {
     8: 'P',
   };
 
+  const OCUPACION_OPTIONS = [
+    { value: '1', label: 'Empleado' },
+    { value: '2', label: 'Independiente' },
+    { value: '3', label: 'Comerciante' },
+    { value: '4', label: 'Pensionado' },
+    { value: '5', label: 'Estudiante' },
+    { value: '6', label: 'Ama de casa' },
+    { value: '7', label: 'Desempleado' },
+    { value: '8', label: 'Otro' },
+  ];
+
+  const departamentosDane = useMemo(() => {
+    const data = departmentsCatalog?.data || [];
+    return [...data].sort((a, b) => a.name.localeCompare(b.name));
+  }, []);
+
+  const ciudadesPorDepartamento = useMemo(() => {
+    if (!departamentoDane) return [];
+    const depId = Number(departamentoDane);
+    const data = (citiesCatalog?.data || []).filter((c) => Number(c.departmentId) === depId);
+    return data.sort((a, b) => a.name.localeCompare(b.name));
+  }, [departamentoDane]);
+
+  const ciiuOptions = useMemo(() => {
+    return (ciiuCatalog || []).map((item) => {
+      const code = String(item.code || '').trim();
+      const description = String(item.description || '').trim();
+      return {
+        code,
+        description,
+        searchText: `${code} ${description}`.toUpperCase(),
+      };
+    });
+  }, []);
+
   const translateErrorMessage = (message) => {
     if (message.includes('already exists')) {
       return 'Ya es asociado de Congente no puede asociarse nuevamente.';
@@ -123,11 +287,11 @@ const VinculacionDigital = () => {
     return message;
   };
 
-  const showNotification = (message) => {
+  const showNotification = (message, type = 'error') => {
     const translatedMessage = translateErrorMessage(message);
-    setNotification({ message: translatedMessage, show: true });
+    setNotification({ message: translatedMessage, show: true, type });
     setTimeout(() => {
-      setNotification({ message: '', show: false });
+      setNotification({ message: '', show: false, type: 'error' });
     }, 5000);
   };
 
@@ -158,8 +322,8 @@ const VinculacionDigital = () => {
         const errorData = await response.json();
         if (response.status === 403 && errorData?.codigo === 'VETADO') {
           showModal(
-            'Validaci??n bloqueada',
-            'Este documento qued?? vetado tras dos intentos fallidos. Por favor comun??cate con Congente para habilitar un nuevo intento.'
+            'Validacion bloqueada',
+            'Este documento quedo vetado tras dos intentos fallidos. Por favor comunicate con Congente para habilitar un nuevo intento.'
           );
           return;
         }
@@ -210,7 +374,7 @@ const VinculacionDigital = () => {
       
       if (estado === 'APROBADO') {
         clearInterval(intervalo);
-        console.log('Biometr??a APROBADA - Avanzando al paso 3');
+        console.log('Biometria APROBADA - Avanzando al paso 3');
         await obtenerLinkLinix(id);
       } else if (estado === 'RECHAZADO') {
         clearInterval(intervalo);
@@ -230,7 +394,7 @@ const VinculacionDigital = () => {
       }
       
       const data = await response.json();
-      console.log('Estado biometr??a:', data.estado_biometria);
+      console.log('Estado biometria:', data.estado_biometria);
       
       setEstadoBiometria(data.estado_biometria);
       setEstadoBiometriaInfo({
@@ -257,18 +421,11 @@ const VinculacionDigital = () => {
       const data = await response.json();
       console.log('Link LINIX obtenido:', data.link_linix);
       
-      setLinkLinix(data.link_linix);
       setVincAgilEnviada(false);
       setPaso(3);
       
     } catch (err) {
       showNotification(err.message);
-    }
-  };
-
-  const irALinix = () => {
-    if (linkLinix) {
-      window.open(linkLinix, '_blank');
     }
   };
 
@@ -291,11 +448,11 @@ const VinculacionDigital = () => {
       const data = await response.json();
       
       if (data.completado) {
-        console.log('Vinculaci??n completada exitosamente');
+        console.log('Vinculacion completada exitosamente');
         setVerificacionFinalizada(true);
         setPaso(4);
       } else {
-        showNotification(data.mensaje || 'A??n no se ha completado el registro en LINIX');
+        showNotification(data.mensaje || 'Aun no se ha completado el registro en LINIX');
       }
       
     } catch (err) {
@@ -338,16 +495,16 @@ const VinculacionDigital = () => {
   };
 
   useEffect(() => {
-    const nombres = (datosBasicos.nombres_completos || '').trim().split(/\s+/).filter(Boolean);
-    const primerNombre = nombres[0] || '';
-    const segundoNombre = nombres.length > 1 ? nombres.slice(1).join(' ') : '';
+    const parsed = parseNombreCompleto(datosBasicos.nombres_completos);
 
     setVinculacionAgil((prev) => ({
       ...prev,
       tipoDocumento: TIPO_DOCUMENTO_CORE_MAP[Number(datosBasicos.tipo_documento)] || prev.tipoDocumento,
       identificacion: datosBasicos.numero_cedula || prev.identificacion,
-      primerNombre: prev.primerNombre || primerNombre,
-      segundoNombre: prev.segundoNombre || segundoNombre,
+      primerNombre: parsed.primerNombre || prev.primerNombre,
+      segundoNombre: parsed.segundoNombre || prev.segundoNombre,
+      primerApellido: parsed.primerApellido || prev.primerApellido,
+      segundoApellido: parsed.segundoApellido || prev.segundoApellido,
       sucursal: datosBasicos.agencia || prev.sucursal,
     }));
   }, [datosBasicos.nombres_completos, datosBasicos.numero_cedula, datosBasicos.tipo_documento, datosBasicos.agencia]);
@@ -361,8 +518,17 @@ const VinculacionDigital = () => {
       'direccion',
       'barrio'
     ];
-    const normalizado = upperFields.includes(campo) ? String(valor).toUpperCase() : valor;
-    setVinculacionAgil((prev) => ({ ...prev, [campo]: normalizado }));
+    const normalizadoBase = upperFields.includes(campo) ? String(valor).toUpperCase() : valor;
+    const normalizado = campo === 'salario'
+      ? String(normalizadoBase || '').replace(/\D/g, '')
+      : normalizadoBase;
+    setVinculacionAgil((prev) => {
+      const siguiente = { ...prev, [campo]: normalizado };
+      if (campo === 'celular') {
+        siguiente.telefono = String(normalizado || '');
+      }
+      return siguiente;
+    });
   };
 
   const enviarVinculacionAgil = async (e) => {
@@ -371,12 +537,38 @@ const VinculacionDigital = () => {
       showNotification('No existe pre-registro activo para enviar vinculacion agil.');
       return;
     }
+    if (!departamentoDane || !vinculacionAgil.ciudad) {
+      showNotification('Debes seleccionar departamento y ciudad DANE.');
+      return;
+    }
+    if (!EMAIL_WITH_DOMAIN_REGEX.test(String(vinculacionAgil.email || '').trim().toLowerCase())) {
+      showNotification('Ingresa un correo electronico valido con dominio, por ejemplo: nombre@dominio.com');
+      return;
+    }
+    if (!vinculacionAgil.actividadCIIU) {
+      showNotification('Debes seleccionar la actividad CIIU principal desde la lista.');
+      return;
+    }
 
     setVincAgilLoading(true);
+    setUltimoEnvioLinix(null);
     try {
+      const fechaActual = new Date().toISOString().slice(0, 10);
       const body = {
         preregistroId,
         ...vinculacionAgil,
+        telefono: vinculacionAgil.celular || vinculacionAgil.telefono,
+        actividadCIIUSecundaria: vinculacionAgil.actividadCIIUSecundaria || '000',
+        tipoVivienda: vinculacionAgil.tipoVivienda || 'P',
+        nivelEstudio: vinculacionAgil.nivelEstudio || 'U',
+        actividadEconomica: vinculacionAgil.actividadEconomica || 'EM',
+        operacionesMonedaExtranjera: 'N',
+        declaraRenta: 'N',
+        administraRecursosPublicos: 'N',
+        vinculadoRecursosPublicos: 'N',
+        publicamenteExpuesto: 'N',
+        sucursal: vinculacionAgil.sucursal || datosBasicos.agencia || 'PRINCIPAL',
+        fechaAfiliacion: vinculacionAgil.fechaAfiliacion || fechaActual,
       };
       const response = await fetch(`${API_BASE_URL}/vinculacion-agil/`, {
         method: 'POST',
@@ -389,8 +581,21 @@ const VinculacionDigital = () => {
         throw new Error(data.detalle || data.error || 'Error enviando vinculacion agil.');
       }
 
+      const respuestaLinix = data.respuesta_linix || {};
+      const rawRespuesta = JSON.stringify(respuestaLinix);
+      const esDryRun = /LINIX_DRY_RUN|modo local|simulada/i.test(rawRespuesta);
+      setUltimoEnvioLinix({
+        dryRun: esDryRun,
+        message: respuestaLinix.message || data.mensaje || '',
+        radicado: respuestaLinix.radicado || '',
+      });
+
       setVincAgilEnviada(true);
-      showNotification('Vinculacion agil enviada a LINIX. Ahora puedes verificar el estado final.');
+      if (esDryRun) {
+        showNotification('Vinculacion agil simulada (DRY_RUN). Ahora desactiva DRY_RUN para validar contra API real.', 'info');
+      } else {
+        showNotification('Vinculacion agil enviada a LINIX correctamente. Ya puedes verificar el estado final.', 'success');
+      }
     } catch (err) {
       showNotification(err.message);
     } finally {
@@ -405,12 +610,20 @@ const VinculacionDigital = () => {
     return `${limpio.slice(0, 90)}...`;
   };
 
-  const Notification = ({ message, show, onClose }) => {
+  const Notification = ({ message, show, type, onClose }) => {
     if (!show) return null;
+    const isSuccess = type === 'success';
+    const isInfo = type === 'info';
+    const containerClass = isSuccess
+      ? 'bg-green-600'
+      : isInfo
+        ? 'bg-amber-500'
+        : 'bg-red-500';
+    const Icon = isSuccess ? CheckCircle : AlertCircle;
 
     return (
-      <div className="fixed top-5 right-5 bg-red-500 text-white p-4 rounded-lg shadow-lg flex items-center animate-fade-in-down">
-        <AlertCircle className="w-6 h-6 mr-3" />
+      <div className={`fixed top-5 right-5 text-white p-4 rounded-lg shadow-lg flex items-center animate-fade-in-down ${containerClass}`}>
+        <Icon className="w-6 h-6 mr-3" />
         <span>{message}</span>
         <button onClick={onClose} className="ml-4 text-white">
           <X className="w-5 h-5" />
@@ -449,6 +662,7 @@ const VinculacionDigital = () => {
       <Notification 
         message={notification.message} 
         show={notification.show} 
+        type={notification.type}
         onClose={() => setNotification({ ...notification, show: false })} 
       />
       <Modal
@@ -466,17 +680,17 @@ const VinculacionDigital = () => {
               <img src={logo} alt="Logo Congente" className="h-24" />
             </div>
             <h1 className="mt-3 text-4xl font-bold" style={{ color: '#0d4974ff' }}>
-              Vinculaci??n Digital
+              Vinculacion Digital
             </h1>
           </div>
 
           <div className="w-full md:w-[420px] md:ml-auto">
             <div className="flex justify-between items-center">
               {[
-                { num: 1, titulo: 'Datos B??sicos', icono: UserCheck },
-                { num: 2, titulo: 'Validaci??n', icono: CheckCircle },
+                { num: 1, titulo: 'Datos Basicos', icono: UserCheck },
+                { num: 2, titulo: 'Validacion', icono: CheckCircle },
                 { num: 3, titulo: 'Formulario', icono: ExternalLink },
-                { num: 4, titulo: 'Verificaci??n', icono: Building2 }
+                { num: 4, titulo: 'Verificacion', icono: Building2 }
               ].map(({ num, titulo, icono: Icon }) => (
                 <div key={num} className="flex flex-col items-center flex-1">
                   <div 
@@ -517,7 +731,7 @@ const VinculacionDigital = () => {
           {paso === 1 && (
             <div>
               <h2 className="text-2xl font-bold text-gray-900 mb-6" style={{ color: '#0d4974ff' }}>
-                Paso 1: Informaci??n B??sica
+                Paso 1: Informacion Basica
               </h2>
               
               <div className="grid grid-cols-1 md:grid-cols-2 md:gap-x-8">
@@ -538,7 +752,7 @@ const VinculacionDigital = () => {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      N??mero de C??dula *
+                      Numero de Cedula *
                     </label>
                     <input
                       type="text"
@@ -554,7 +768,7 @@ const VinculacionDigital = () => {
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Fecha de Expedici??n *
+                      Fecha de Expedicion *
                     </label>
                     <input
                       type="date"
@@ -588,7 +802,7 @@ const VinculacionDigital = () => {
 
               <div className="mt-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  ??En qu?? agencia te gustar??a inscribirte? *
+                  En que agencia te gustaria inscribirte? *
                 </label>
                 <select
                   required
@@ -617,7 +831,7 @@ const VinculacionDigital = () => {
                     Procesando...
                   </>
                 ) : (
-                  'Continuar a Validaci??n Biom??trica'
+                  'Continuar a Validacion Biometrica'
                 )}
               </button>
             </div>
@@ -626,14 +840,14 @@ const VinculacionDigital = () => {
 {paso === 2 && (
             <div className="text-center py-12">
               <h2 className="text-2xl font-bold text-gray-900 mb-4" style={{ color: '#0d4974ff' }}>
-                Validaci??n de Identidad
+                Validacion de Identidad
               </h2>
               
               {estadoBiometria === 'APROBADO' ? (
                 <>
                   <CheckCircle className="w-16 h-16 mx-auto mb-4" style={{ color: '#10B981' }} />
                   <p className="text-green-600 font-semibold mb-2">
-                    ??Validaci??n Exitosa!
+                    Validacion Exitosa!
                   </p>
                   <p className="text-gray-600">
                     {estadoBiometriaInfo.mensaje || 'Redirigiendo al formulario de LINIX...'}
@@ -643,7 +857,7 @@ const VinculacionDigital = () => {
                 <>
                   <AlertCircle className="w-16 h-16 text-red-600 mx-auto mb-4" />
                   <p className="text-red-600 font-semibold mb-2">
-                    Validaci??n Rechazada
+                    Validacion Rechazada
                   </p>
                   <p className="text-gray-600">
                     {estadoBiometriaInfo.mensaje || 'No fue posible validar tu identidad.'}
@@ -659,14 +873,14 @@ const VinculacionDigital = () => {
                     className="mt-6 text-white px-6 py-2 rounded-lg transition-colors disabled:bg-gray-400"
                     style={{ backgroundColor: loading ? '#9CA3AF' : '#D56911' }}
                   >
-                    Reintentar Validaci??n
+                    Reintentar Validacion
                   </button>
                 </>
               ) : (
                 <>
                   <Loader2 className="w-16 h-16 mx-auto mb-4 animate-spin" style={{ color: '#0d4974ff' }} />
                   <p className="text-gray-600 mb-4">
-                    {estadoBiometriaInfo.mensaje || 'Esperando validaci??n biom??trica...'}
+                    {estadoBiometriaInfo.mensaje || 'Esperando validacion biometrica...'}
                   </p>
                   {estadoBiometriaInfo.justificacion && (
                     <p className="text-sm text-gray-500 mb-4">
@@ -676,8 +890,8 @@ const VinculacionDigital = () => {
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 max-w-md mx-auto">
                     <p className="text-sm text-gray-700 mb-4">
                       {(LINK_BIOMETRIA || linkBiometria) 
-                        ? 'Si a??n no has completado la validaci??n, haz clic en el bot??n:'
-                        : 'En producci??n, se abrir?? una ventana para validar tu identidad.'
+                        ? 'Si aun no has completado la validacion, haz clic en el boton:'
+                        : 'En produccion, se abrira una ventana para validar tu identidad.'
                       }
                     </p>
                     {(LINK_BIOMETRIA || linkBiometria) && (
@@ -686,11 +900,11 @@ const VinculacionDigital = () => {
                         className="text-white px-6 py-2 rounded-lg transition-colors"
                         style={{ backgroundColor: '#0d4974ff' }}
                       >
-                        Abrir Validaci??n
+                        Abrir Validacion
                       </button>
                     )}
                     <p className="text-xs text-gray-500 mt-4">
-                      Esta p??gina se actualizar?? autom??ticamente cuando completes la validaci??n.
+                      Esta pagina se actualizara automaticamente cuando completes la validacion.
                     </p>
                   </div>
                 </>
@@ -703,78 +917,175 @@ const VinculacionDigital = () => {
               <h2 className="text-2xl font-bold text-gray-900 mb-4" style={{ color: '#0d4974ff' }}>
                 Paso 3: Vinculacion Agil
               </h2>
-
               <p className="text-gray-600 mb-6">
-                Diligencia los datos minimos para construir y enviar la trama al core LINIX.
+                Completa los datos requeridos para radicar la vinculacion al core LINIX.
               </p>
-
-              <form onSubmit={enviarVinculacionAgil} className="space-y-4">
+              <form onSubmit={enviarVinculacionAgil} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <select value={vinculacionAgil.tipoDocumento} onChange={(e) => actualizarVinculacionAgil('tipoDocumento', e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg">
-                    <option value="C">Cedula</option>
-                    <option value="T">Tarjeta Identidad</option>
-                    <option value="E">Cedula Extranjeria</option>
-                    <option value="N">NIT</option>
-                    <option value="P">Pasaporte</option>
-                  </select>
-                  <input className="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="Identificacion *" value={vinculacionAgil.identificacion} onChange={(e) => actualizarVinculacionAgil('identificacion', e.target.value)} required />
-                  <input type="date" className="w-full px-3 py-2 border border-gray-300 rounded-lg" value={vinculacionAgil.fechaNacimiento} onChange={(e) => actualizarVinculacionAgil('fechaNacimiento', e.target.value)} required />
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de documento *</label>
+                    <select value={vinculacionAgil.tipoDocumento} onChange={(e) => actualizarVinculacionAgil('tipoDocumento', e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                      <option value="C">Cedula</option>
+                      <option value="T">Tarjeta de identidad</option>
+                      <option value="E">Cedula de extranjeria</option>
+                      <option value="N">NIT</option>
+                      <option value="P">Pasaporte</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Identificacion *</label>
+                    <input className="w-full px-3 py-2 border border-gray-300 rounded-lg" value={vinculacionAgil.identificacion} onChange={(e) => actualizarVinculacionAgil('identificacion', e.target.value)} required />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de nacimiento *</label>
+                    <input type="date" className="w-full px-3 py-2 border border-gray-300 rounded-lg" value={vinculacionAgil.fechaNacimiento} onChange={(e) => actualizarVinculacionAgil('fechaNacimiento', e.target.value)} required />
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <input className="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="Primer Nombre *" value={vinculacionAgil.primerNombre} onChange={(e) => actualizarVinculacionAgil('primerNombre', e.target.value)} required />
-                  <input className="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="Segundo Nombre" value={vinculacionAgil.segundoNombre} onChange={(e) => actualizarVinculacionAgil('segundoNombre', e.target.value)} />
-                  <input className="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="Primer Apellido *" value={vinculacionAgil.primerApellido} onChange={(e) => actualizarVinculacionAgil('primerApellido', e.target.value)} required />
-                  <input className="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="Segundo Apellido" value={vinculacionAgil.segundoApellido} onChange={(e) => actualizarVinculacionAgil('segundoApellido', e.target.value)} />
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Primer nombre *</label>
+                    <input className="w-full px-3 py-2 border border-gray-300 rounded-lg" value={vinculacionAgil.primerNombre} onChange={(e) => actualizarVinculacionAgil('primerNombre', e.target.value)} required />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Segundo nombre</label>
+                    <input className="w-full px-3 py-2 border border-gray-300 rounded-lg" value={vinculacionAgil.segundoNombre} onChange={(e) => actualizarVinculacionAgil('segundoNombre', e.target.value)} />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Primer apellido *</label>
+                    <input className="w-full px-3 py-2 border border-gray-300 rounded-lg" value={vinculacionAgil.primerApellido} onChange={(e) => actualizarVinculacionAgil('primerApellido', e.target.value)} required />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Segundo apellido</label>
+                    <input className="w-full px-3 py-2 border border-gray-300 rounded-lg" value={vinculacionAgil.segundoApellido} onChange={(e) => actualizarVinculacionAgil('segundoApellido', e.target.value)} />
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                  <select value={vinculacionAgil.genero} onChange={(e) => actualizarVinculacionAgil('genero', e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg"><option value="M">Masculino</option><option value="F">Femenino</option></select>
-                  <select value={vinculacionAgil.estadoCivil} onChange={(e) => actualizarVinculacionAgil('estadoCivil', e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg"><option value="S">Soltero</option><option value="C">Casado</option><option value="U">Union Libre</option></select>
-                  <input type="email" className="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="Email *" value={vinculacionAgil.email} onChange={(e) => actualizarVinculacionAgil('email', e.target.value)} required />
-                  <input className="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="Celular *" value={vinculacionAgil.celular} onChange={(e) => actualizarVinculacionAgil('celular', e.target.value)} required />
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Genero *</label>
+                    <select value={vinculacionAgil.genero} onChange={(e) => actualizarVinculacionAgil('genero', e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg"><option value="M">Masculino</option><option value="F">Femenino</option></select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Estado civil *</label>
+                    <select value={vinculacionAgil.estadoCivil} onChange={(e) => actualizarVinculacionAgil('estadoCivil', e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg"><option value="S">Soltero</option><option value="C">Casado</option><option value="U">Union libre</option></select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Correo electronico *</label>
+                    <input type="email" className="w-full px-3 py-2 border border-gray-300 rounded-lg" value={vinculacionAgil.email} onChange={(e) => actualizarVinculacionAgil('email', e.target.value)} required />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Celular *</label>
+                    <input className="w-full px-3 py-2 border border-gray-300 rounded-lg" value={vinculacionAgil.celular} onChange={(e) => actualizarVinculacionAgil('celular', e.target.value)} required />
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <input className="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="Telefono" value={vinculacionAgil.telefono} onChange={(e) => actualizarVinculacionAgil('telefono', e.target.value)} />
-                  <input className="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="Direccion *" value={vinculacionAgil.direccion} onChange={(e) => actualizarVinculacionAgil('direccion', e.target.value)} required />
-                  <input className="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="Barrio *" value={vinculacionAgil.barrio} onChange={(e) => actualizarVinculacionAgil('barrio', e.target.value)} required />
-                  <input className="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="Ciudad DANE *" value={vinculacionAgil.ciudad} onChange={(e) => actualizarVinculacionAgil('ciudad', e.target.value)} required />
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Direccion *</label>
+                    <input className="w-full px-3 py-2 border border-gray-300 rounded-lg" value={vinculacionAgil.direccion} onChange={(e) => actualizarVinculacionAgil('direccion', e.target.value)} required />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Barrio *</label>
+                    <input className="w-full px-3 py-2 border border-gray-300 rounded-lg" value={vinculacionAgil.barrio} onChange={(e) => actualizarVinculacionAgil('barrio', e.target.value)} required />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Departamento DANE *</label>
+                    <select value={departamentoDane} onChange={(e) => { setDepartamentoDane(e.target.value); actualizarVinculacionAgil('ciudad', ''); }} className="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                      <option value="">Seleccione departamento</option>
+                      {departamentosDane.map((dep) => (
+                        <option key={dep.id} value={dep.id}>{dep.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Ciudad (codigo DANE) *</label>
+                    <select value={vinculacionAgil.ciudad} onChange={(e) => actualizarVinculacionAgil('ciudad', e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg">
+                      <option value="">Seleccione ciudad</option>
+                      {ciudadesPorDepartamento.map((city) => (
+                        <option key={city.id} value={String(city.id)}>
+                          {city.name} - {city.id}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                  <input type="number" min="1" max="6" className="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="Estrato *" value={vinculacionAgil.estrato} onChange={(e) => actualizarVinculacionAgil('estrato', Number(e.target.value))} required />
-                  <input className="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="Tipo Vivienda *" value={vinculacionAgil.tipoVivienda} onChange={(e) => actualizarVinculacionAgil('tipoVivienda', e.target.value)} required />
-                  <input className="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="Nivel Estudio *" value={vinculacionAgil.nivelEstudio} onChange={(e) => actualizarVinculacionAgil('nivelEstudio', e.target.value)} required />
-                  <input className="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="Actividad Economica *" value={vinculacionAgil.actividadEconomica} onChange={(e) => actualizarVinculacionAgil('actividadEconomica', e.target.value)} required />
-                  <input className="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="Ocupacion *" value={vinculacionAgil.ocupacion} onChange={(e) => actualizarVinculacionAgil('ocupacion', e.target.value)} required />
-                  <input className="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="CIIU *" value={vinculacionAgil.actividadCIIU} onChange={(e) => actualizarVinculacionAgil('actividadCIIU', e.target.value)} required />
-                  <input className="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="CIIU Secundario *" value={vinculacionAgil.actividadCIIUSecundaria} onChange={(e) => actualizarVinculacionAgil('actividadCIIUSecundaria', e.target.value)} required />
-                  <input type="number" min="0" className="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="Personas a cargo *" value={vinculacionAgil.personasCargo} onChange={(e) => actualizarVinculacionAgil('personasCargo', Number(e.target.value))} required />
-                  <input type="number" min="0" className="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="Salario *" value={vinculacionAgil.salario} onChange={(e) => actualizarVinculacionAgil('salario', e.target.value)} required />
-                  <select value={vinculacionAgil.poblacionVulnerable} onChange={(e) => actualizarVinculacionAgil('poblacionVulnerable', e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg"><option value="N">Poblacion vulnerable: No</option><option value="S">Poblacion vulnerable: Si</option></select>
-                  <select value={vinculacionAgil.publicamenteExpuesto} onChange={(e) => actualizarVinculacionAgil('publicamenteExpuesto', e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg"><option value="N">PEP: No</option><option value="S">PEP: Si</option></select>
-                  <select value={vinculacionAgil.operacionesMonedaExtranjera} onChange={(e) => actualizarVinculacionAgil('operacionesMonedaExtranjera', e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg"><option value="N">Moneda extranjera: No</option><option value="S">Moneda extranjera: Si</option></select>
-                  <select value={vinculacionAgil.declaraRenta} onChange={(e) => actualizarVinculacionAgil('declaraRenta', e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg"><option value="N">Declara renta: No</option><option value="S">Declara renta: Si</option></select>
-                  <select value={vinculacionAgil.administraRecursosPublicos} onChange={(e) => actualizarVinculacionAgil('administraRecursosPublicos', e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg"><option value="N">Administra recursos publicos: No</option><option value="S">Administra recursos publicos: Si</option></select>
-                  <select value={vinculacionAgil.vinculadoRecursosPublicos} onChange={(e) => actualizarVinculacionAgil('vinculadoRecursosPublicos', e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg"><option value="N">Vinculado recursos publicos: No</option><option value="S">Vinculado recursos publicos: Si</option></select>
-                  <input className="w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="Sucursal *" value={vinculacionAgil.sucursal} onChange={(e) => actualizarVinculacionAgil('sucursal', e.target.value)} required />
-                  <input type="date" className="w-full px-3 py-2 border border-gray-300 rounded-lg" value={vinculacionAgil.fechaAfiliacion} onChange={(e) => actualizarVinculacionAgil('fechaAfiliacion', e.target.value)} required />
+                  <div><label className="block text-sm font-medium text-gray-700 mb-1">Estrato *</label><input type="number" min="1" max="6" className="w-full px-3 py-2 border border-gray-300 rounded-lg" value={vinculacionAgil.estrato} onChange={(e) => actualizarVinculacionAgil('estrato', Number(e.target.value))} required /></div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Ocupacion *</label>
+                    <select className="w-full px-3 py-2 border border-gray-300 rounded-lg" value={vinculacionAgil.ocupacion} onChange={(e) => actualizarVinculacionAgil('ocupacion', e.target.value)} required>
+                      {OCUPACION_OPTIONS.map((option) => (
+                        <option key={option.value} value={option.value}>{option.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <CiiuAutocompleteField
+                    id="actividad-ciiu-principal"
+                    label="Actividad CIIU principal *"
+                    value={vinculacionAgil.actividadCIIU}
+                    onSelect={(code) => actualizarVinculacionAgil('actividadCIIU', code)}
+                    options={ciiuOptions}
+                    placeholder="Escribe codigo o actividad (ej: SISTEMAS)"
+                    className="md:col-span-2"
+                  />
+                  <div><label className="block text-sm font-medium text-gray-700 mb-1">Personas a cargo *</label><input type="number" min="0" className="w-full px-3 py-2 border border-gray-300 rounded-lg" value={vinculacionAgil.personasCargo} onChange={(e) => actualizarVinculacionAgil('personasCargo', Number(e.target.value))} required /></div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Salario (COP) *</label>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                      value={vinculacionAgil.salario ? COP_FORMATTER.format(Number(vinculacionAgil.salario)) : ''}
+                      onChange={(e) => actualizarVinculacionAgil('salario', e.target.value)}
+                      placeholder="2.400.000"
+                      required
+                    />
+                  </div>
+                  <div><label className="block text-sm font-medium text-gray-700 mb-1">Poblacion vulnerable *</label><select value={vinculacionAgil.poblacionVulnerable} onChange={(e) => actualizarVinculacionAgil('poblacionVulnerable', e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg"><option value="N">No</option><option value="S">Si</option></select></div>
                 </div>
 
                 <div className="flex flex-col md:flex-row gap-3">
                   <button type="submit" disabled={vincAgilLoading} className="text-white px-6 py-2 rounded-lg transition-colors disabled:bg-gray-400" style={{ backgroundColor: vincAgilLoading ? '#9CA3AF' : '#D56911' }}>
-                    {vincAgilLoading ? 'Enviando...' : 'Enviar Vinculacion Agil'}
-                  </button>
-                  <button type="button" onClick={irALinix} className="text-white px-6 py-2 rounded-lg transition-colors" style={{ backgroundColor: '#0d4974ff' }}>
-                    Abrir LINIX Externo (Opcional)
+                    {vincAgilLoading ? 'Subiendo vinculacion...' : 'Enviar Vinculacion Agil'}
                   </button>
                   <button type="button" onClick={verificarCreacionLinix} disabled={loading || !vincAgilEnviada} className="text-white px-8 py-2 rounded-lg font-semibold transition-colors disabled:bg-gray-400" style={{ backgroundColor: loading || !vincAgilEnviada ? '#9CA3AF' : '#0d4974ff' }}>
                     {loading ? 'Verificando...' : 'Verificar Registro'}
                   </button>
                 </div>
+
+                {vincAgilLoading && (
+                  <div className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-blue-900 flex items-center gap-2">
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    <p className="text-sm font-medium">Subiendo vinculacion agil al core LINIX. Espera unos segundos...</p>
+                  </div>
+                )}
+
+                {ultimoEnvioLinix && !vincAgilLoading && (
+                  <div className={`rounded-lg px-4 py-3 flex items-start gap-2 ${
+                    ultimoEnvioLinix.dryRun ? 'border border-amber-300 bg-amber-50 text-amber-900' : 'border border-green-300 bg-green-50 text-green-900'
+                  }`}>
+                    <CheckCircle className="w-5 h-5 mt-0.5 flex-shrink-0" />
+                    <div className="text-sm">
+                      <p className="font-medium">
+                        {ultimoEnvioLinix.dryRun ? 'Vinculacion enviada en modo simulado (DRY_RUN).' : 'Vinculacion enviada correctamente a LINIX.'}
+                      </p>
+                      {ultimoEnvioLinix.radicado && (
+                        <p>Radicado: <strong>{ultimoEnvioLinix.radicado}</strong></p>
+                      )}
+                      {ultimoEnvioLinix.message && (
+                        <p>{ultimoEnvioLinix.message}</p>
+                      )}
+                    </div>
+                  </div>
+                )}
+
                 {!vincAgilEnviada && (
-                  <p className="text-sm text-gray-500">Debes enviar la vinculacion agil antes de ejecutar la verificacion final.</p>
+                  <div className="rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-amber-900 flex items-start gap-2">
+                    <AlertCircle className="w-5 h-5 mt-0.5 flex-shrink-0" />
+                    <p className="text-sm font-medium">Debes enviar la vinculacion agil antes de ejecutar la verificacion final.</p>
+                  </div>
                 )}
               </form>
             </div>
@@ -785,22 +1096,22 @@ const VinculacionDigital = () => {
               <CheckCircle className="w-20 h-20 mx-auto mb-4" style={{ color: '#10B981' }} />
               
               <h2 className="text-3xl font-bold text-gray-900 mb-4" style={{ color: '#0d4974ff' }}>
-                ??Vinculaci??n Completada!
+                Vinculacion Completada!
               </h2>
               
               <p className="text-lg text-gray-600 mb-6">
-                Tu proceso de vinculaci??n se complet?? exitosamente.
+                Tu proceso de vinculacion se completo exitosamente.
               </p>
               
               <div className="bg-green-50 border border-green-200 rounded-lg p-6 max-w-md mx-auto">
                 <p className="text-sm text-gray-700">
                   Un asesor de la agencia <strong>{datosBasicos.agencia}</strong> se 
-                  contactar?? contigo pronto para finalizar el proceso.
+                  contactara contigo pronto para finalizar el proceso.
                 </p>
               </div>
 
               <div className="mt-8 text-sm text-gray-600">
-                <p>N??mero de identificaci??n: <strong>{datosBasicos.numero_cedula}</strong></p>
+                <p>Numero de identificacion: <strong>{datosBasicos.numero_cedula}</strong></p>
                 <p>Nombre: <strong>{datosBasicos.nombres_completos}</strong></p>
               </div>
             </div>
@@ -808,7 +1119,7 @@ const VinculacionDigital = () => {
         </div>
 
         <div className="mt-8 text-center text-sm text-gray-600">
-          <p>??S??guenos en nuestras redes sociales!</p>
+          <p>Siguenos en nuestras redes sociales!</p>
           <div className="flex justify-center space-x-4 my-4">
             {redesSociales.map(red => (
               <a key={red.nombre} href={red.url} target="_blank" rel="noopener noreferrer">
@@ -816,7 +1127,7 @@ const VinculacionDigital = () => {
               </a>
             ))}
           </div>
-          <p>??Necesitas ayuda? Contacta a nuestro equipo de soporte</p>
+          <p>Necesitas ayuda? Contacta a nuestro equipo de soporte</p>
           <p className="mt-2">
             <a href="https://www.congente.coop" target="_blank" rel="noopener noreferrer" className="hover:underline" style={{ color: '#0d4974ff' }}>
               www.congente.coop
@@ -832,4 +1143,3 @@ const VinculacionDigital = () => {
 };
 
 export default VinculacionDigital;
-

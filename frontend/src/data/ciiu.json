@@ -1,0 +1,2006 @@
+[
+    {
+        "code":  "2640",
+        "description":  "FABRICACION DE APARATOS ELECTRONICOS DE CONSUMO."
+    },
+    {
+        "code":  "2651",
+        "description":  "FABRICACION DE EQUIPO DE MEDICION, PRUEBA, NAVEGACION Y CONTROL."
+    },
+    {
+        "code":  "2652",
+        "description":  "FABRICACION DE RELOJES."
+    },
+    {
+        "code":  "2660",
+        "description":  "FABRICACION DE EQUIPO DE IRRADIACION Y EQUIPO ELECTRONICO DE USO MEDICO Y TERAPEUTICO."
+    },
+    {
+        "code":  "2670",
+        "description":  "FABRICACION DE INSTRUMENTOS OPTICOS Y EQUIPO FOTOGRAFICO."
+    },
+    {
+        "code":  "2680",
+        "description":  "FABRICACION DE MEDIOS MAGNETICOS Y OPTICOS PARA ALMACENAMIENTO DE DATOS."
+    },
+    {
+        "code":  "2711",
+        "description":  "FABRICACION DE MOTORES, GENERADORES Y TRANSFORMADORES ELECTRICOS."
+    },
+    {
+        "code":  "2712",
+        "description":  "FABRICACION DE APARATOS DE DISTRIBUCION Y CONTROL DE LA ENERGIA ELECTRICA."
+    },
+    {
+        "code":  "2720",
+        "description":  "FABRICACION DE PILAS, BATERIAS Y ACUMULADORES ELECTRICOS."
+    },
+    {
+        "code":  "2731",
+        "description":  "FABRICACION DE HILOS Y CABLES ELECTRICOS Y DE FIBRA OPTICA."
+    },
+    {
+        "code":  "2732",
+        "description":  "FABRICACION DE DISPOSITIVOS DE CABLEADO."
+    },
+    {
+        "code":  "2740",
+        "description":  "FABRICACION DE EQUIPOS ELECTRICOS DE ILUMINACION."
+    },
+    {
+        "code":  "2750",
+        "description":  "FABRICACION DE APARATOS DE USO DOMESTICO."
+    },
+    {
+        "code":  "2790",
+        "description":  "FABRICACION DE OTROS TIPOS DE EQUIPO ELECTRICO N.C.P."
+    },
+    {
+        "code":  "2811",
+        "description":  "FABRICACION DE MOTORES, TURBINAS, Y PARTES PARA MOTORES DE COMBUSTION INTERNA."
+    },
+    {
+        "code":  "2812",
+        "description":  "FABRICACION DE EQUIPOS DE POTENCIA HIDRAULICA Y NEUMATICA."
+    },
+    {
+        "code":  "2813",
+        "description":  "FABRICACION DE OTRAS BOMBAS, COMPRESORES, GRIFOS Y VALVULAS."
+    },
+    {
+        "code":  "2814",
+        "description":  "FABRICACION DE COJINETES, ENGRANAJES, TRENES DE ENGRANAJES Y PIEZAS DE TRANSMISION."
+    },
+    {
+        "code":  "2815",
+        "description":  "FABRICACION DE HORNOS, HOGARES Y QUEMADORES INDUSTRIALES."
+    },
+    {
+        "code":  "2816",
+        "description":  "FABRICACION DE EQUIPO DE ELEVACION Y MANIPULACION."
+    },
+    {
+        "code":  "2817",
+        "description":  "FABRICACION DE MAQUINARIA Y EQUIPO DE OFICINA (EXCEPTO COMPUTADORAS Y EQUIPO PERIFERICO)."
+    },
+    {
+        "code":  "2818",
+        "description":  "FABRICACION DE HERRAMIENTAS MANUALES CON MOTOR."
+    },
+    {
+        "code":  "2819",
+        "description":  "FABRICACION DE OTROS TIPOS DE MAQUINARIA Y EQUIPO DE USO GENERAL N.C.P."
+    },
+    {
+        "code":  "2821",
+        "description":  "FABRICACION DE MAQUINARIA AGROPECUARIA Y FORESTAL."
+    },
+    {
+        "code":  "2822",
+        "description":  "FABRICACION DE MAQUINAS FORMADORAS DE METAL Y DE MAQUINAS HERRAMIENTA."
+    },
+    {
+        "code":  "2823",
+        "description":  "FABRICACION DE MAQUINARIA PARA LA METALURGIA."
+    },
+    {
+        "code":  "2824",
+        "description":  "FABRICACION DE MAQUINARIA PARA EXPLOTACION DE MINAS Y CANTERAS Y PARA OBRAS DE CONSTRUCCION."
+    },
+    {
+        "code":  "2825",
+        "description":  "FABRICACION DE MAQUINARIA PARA LA ELABORACION DE ALIMENTOS, BEBIDAS Y TABACO."
+    },
+    {
+        "code":  "2826",
+        "description":  "FABRICACION DE MAQUINARIA PARA LA ELABORACION DE PRODUCTOS TEXTILES, PRENDAS DE VESTIR Y CUEROS."
+    },
+    {
+        "code":  "2829",
+        "description":  "FABRICACION DE OTROS TIPOS DE MAQUINARIA Y EQUIPO DE USO ESPECIAL N.C.P."
+    },
+    {
+        "code":  "2910",
+        "description":  "FABRICACION DE VEHICULOS AUTOMOTORES Y SUS MOTORES."
+    },
+    {
+        "code":  "2920",
+        "description":  "FABRICACION DE CARROCERIAS PARA VEHICULOS AUTOMOTORES"
+    },
+    {
+        "code":  "2930",
+        "description":  "FABRICACION DE PARTES, PIEZAS (AUTOPARTES) Y ACCESORIOS (LUJOS) PARA VEHICULOS AUTOMOTORES."
+    },
+    {
+        "code":  "3011",
+        "description":  "CONSTRUCCION DE BARCOS Y DE ESTRUCTURAS FLOTANTES."
+    },
+    {
+        "code":  "3012",
+        "description":  "CONSTRUCCION DE EMBARCACIONES DE RECREO Y DEPORTE."
+    },
+    {
+        "code":  "3020",
+        "description":  "FABRICACION DE LOCOMOTORAS Y DE MATERIAL RODANTE PARA FERROCARRILES."
+    },
+    {
+        "code":  "3030",
+        "description":  "FABRICACION DE AERONAVES, NAVES ESPACIALES Y DE MAQUINARIA CONEXA."
+    },
+    {
+        "code":  "3040",
+        "description":  "FABRICACION DE VEHICULOS MILITARES DE COMBATE."
+    },
+    {
+        "code":  "3091",
+        "description":  "FABRICACION DE MOTOCICLETAS."
+    },
+    {
+        "code":  "3092",
+        "description":  "FABRICACION DE BICICLETAS Y DE SILLAS DE RUEDAS PARA PERSONAS CON DISCAPACIDAD."
+    },
+    {
+        "code":  "3099",
+        "description":  "FABRICACION DE OTROS TIPOS DE EQUIPO DE TRANSPORTE N.C.P."
+    },
+    {
+        "code":  "3110",
+        "description":  "FABRICACION DE MUEBLES."
+    },
+    {
+        "code":  "3120",
+        "description":  "FABRICACION DE COLCHONES Y SOMIERES."
+    },
+    {
+        "code":  "3210",
+        "description":  "FABRICACION DE JOYAS, BISUTERIA Y ARTICULOS CONEXOS."
+    },
+    {
+        "code":  "3220",
+        "description":  "FABRICACION DE INSTRUMENTOS MUSICALES."
+    },
+    {
+        "code":  "3230",
+        "description":  "FABRICACION DE ARTICULOS Y EQUIPO PARA LA PRACTICA DEL DEPORTE."
+    },
+    {
+        "code":  "3240",
+        "description":  "FABRICACION DE JUEGOS, JUGUETES Y ROMPECABEZAS."
+    },
+    {
+        "code":  "3250",
+        "description":  "FABRICACION DE INSTRUMENTOS, APARATOS Y MATERIALES MEDICOS Y ODONTOLOGICOS (INCLUIDO MOBILIARIO)."
+    },
+    {
+        "code":  "3290",
+        "description":  "OTRAS INDUSTRIAS MANUFACTURERAS N.C.P."
+    },
+    {
+        "code":  "3311",
+        "description":  "MANTENIMIENTO Y REPARACION ESPECIALIZADO DE PRODUCTOS ELABORADOS EN METAL."
+    },
+    {
+        "code":  "3312",
+        "description":  "MANTENIMIENTO Y REPARACION ESPECIALIZADO DE MAQUINARIA Y EQUIPO."
+    },
+    {
+        "code":  "3313",
+        "description":  "MANTENIMIENTO Y REPARACION ESPECIALIZADO DE EQUIPO ELECTRONICO Y OPTICO."
+    },
+    {
+        "code":  "3314",
+        "description":  "MANTENIMIENTO Y REPARACION ESPECIALIZADO DE EQUIPO ELECTRICO."
+    },
+    {
+        "code":  "3315",
+        "description":  "MANTENIMIENTO Y REPARACION ESPECIALIZADO DE EQUIPO DE TRANSPORTE, EXCEPTO LOS VEHICULOS AUTOMOTORES, MOTOCICLETAS Y BICICLETAS."
+    },
+    {
+        "code":  "3319",
+        "description":  "MANTENIMIENTO Y REPARACION DE OTROS TIPOS DE EQUIPOS Y SUS COMPONENTES N.C.P."
+    },
+    {
+        "code":  "3320",
+        "description":  "INSTALACION ESPECIALIZADA DE MAQUINARIA Y EQUIPO INDUSTRIAL."
+    },
+    {
+        "code":  "3511",
+        "description":  "GENERACION DE ENERGIA ELECTRICA."
+    },
+    {
+        "code":  "3512",
+        "description":  "TRANSMISION DE ENERGIA ELECTRICA."
+    },
+    {
+        "code":  "3513",
+        "description":  "DISTRIBUCION DE ENERGIA ELECTRICA."
+    },
+    {
+        "code":  "3514",
+        "description":  "COMERCIALIZACION DE ENERGIA ELECTRICA."
+    },
+    {
+        "code":  "3520",
+        "description":  "PRODUCCION DE GAS"
+    },
+    {
+        "code":  "3530",
+        "description":  "SUMINISTRO DE VAPOR Y AIRE ACONDICIONADO."
+    },
+    {
+        "code":  "3600",
+        "description":  "CAPTACION, TRATAMIENTO Y DISTRIBUCION DE AGUA."
+    },
+    {
+        "code":  "3700",
+        "description":  "EVACUACION Y TRATAMIENTO DE AGUAS RESIDUALES."
+    },
+    {
+        "code":  "3811",
+        "description":  "RECOLECCION DE DESECHOS NO PELIGROSOS."
+    },
+    {
+        "code":  "3812",
+        "description":  "RECOLECCION DE DESECHOS PELIGROSOS."
+    },
+    {
+        "code":  "3821",
+        "description":  "TRATAMIENTO Y DISPOSICION DE DESECHOS NO PELIGROSOS."
+    },
+    {
+        "code":  "3822",
+        "description":  "TRATAMIENTO Y DISPOSICION DE DESECHOS PELIGROSOS."
+    },
+    {
+        "code":  "3830",
+        "description":  "RECUPERACION DE MATERIALES."
+    },
+    {
+        "code":  "3900",
+        "description":  "ACTIVIDADES DE SANEAMIENTO AMBIENTAL Y OTROS SERVICIOS DE GESTION DE DESECHOS."
+    },
+    {
+        "code":  "4111",
+        "description":  "CONSTRUCCION DE EDIFICIOS RESIDENCIALES."
+    },
+    {
+        "code":  "4112",
+        "description":  "CONSTRUCCION DE EDIFICIOS NO RESIDENCIALES."
+    },
+    {
+        "code":  "4210",
+        "description":  "CONSTRUCCION DE CARRETERAS Y VIAS DE FERROCARRIL."
+    },
+    {
+        "code":  "4220",
+        "description":  "CONSTRUCCION DE PROYECTOS DE SERVICIO PUBLICO."
+    },
+    {
+        "code":  "4290",
+        "description":  "CONSTRUCCION DE OTRAS OBRAS DE INGENIERIA CIVIL."
+    },
+    {
+        "code":  "4311",
+        "description":  "DEMOLICION."
+    },
+    {
+        "code":  "4312",
+        "description":  "PREPARACION DEL TERRENO."
+    },
+    {
+        "code":  "4321",
+        "description":  "INSTALACIONES ELECTRICAS."
+    },
+    {
+        "code":  "4322",
+        "description":  "INSTALACIONES DE FONTANERIA, CALEFACCION Y AIRE ACONDICIONADO."
+    },
+    {
+        "code":  "4329",
+        "description":  "OTRAS INSTALACIONES ESPECIALIZADAS."
+    },
+    {
+        "code":  "4330",
+        "description":  "TERMINACION Y ACABADO DE EDIFICIOS Y OBRAS DE INGENIERIA CIVIL."
+    },
+    {
+        "code":  "4390",
+        "description":  "OTRAS ACTIVIDADES ESPECIALIZADAS PARA LA CONSTRUCCION DE EDIFICIOS Y OBRAS DE INGENIERIA CIVIL."
+    },
+    {
+        "code":  "4511",
+        "description":  "COMERCIO DE VEHICULOS AUTOMOTORES NUEVOS."
+    },
+    {
+        "code":  "4512",
+        "description":  "COMERCIO DE VEHICULOS AUTOMOTORES USADOS."
+    },
+    {
+        "code":  "4520",
+        "description":  "MANTENIMIENTO Y REPARACION DE VEHICULOS AUTOMOTORES."
+    },
+    {
+        "code":  "4530",
+        "description":  "COMERCIO DE PARTES, PIEZAS (AUTOPARTES) Y ACCESORIOS (LUJOS) PARA VEHICULOS AUTOMOTORES."
+    },
+    {
+        "code":  "4541",
+        "description":  "COMERCIO DE MOTOCICLETAS Y DE SUS PARTES, PIEZAS Y ACCESORIOS."
+    },
+    {
+        "code":  "4542",
+        "description":  "MANTENIMIENTO Y REPARACION DE MOTOCICLETAS Y DE SUS PARTES Y PIEZAS."
+    },
+    {
+        "code":  "4610",
+        "description":  "COMERCIO AL POR MAYOR A CAMBIO DE UNA RETRIBUCION O POR CONTRATA."
+    },
+    {
+        "code":  "4620",
+        "description":  "COMERCIO AL POR MAYOR DE MATERIAS PRIMAS AGROPECUARIAS"
+    },
+    {
+        "code":  "4631",
+        "description":  "COMERCIO AL POR MAYOR DE PRODUCTOS ALIMENTICIOS."
+    },
+    {
+        "code":  "4632",
+        "description":  "COMERCIO AL POR MAYOR DE BEBIDAS Y TABACO."
+    },
+    {
+        "code":  "4641",
+        "description":  "COMERCIO AL POR MAYOR DE PRODUCTOS TEXTILES, PRODUCTOS CONFECCIONADOS PARA USO DOMESTICO."
+    },
+    {
+        "code":  "4642",
+        "description":  "COMERCIO AL POR MAYOR DE PRENDAS DE VESTIR."
+    },
+    {
+        "code":  "0111",
+        "description":  "CULTIVO DE CEREALES (EXCEPTO ARROZ), LEGUMBRES Y SEMILLAS OLEAGINOSAS."
+    },
+    {
+        "code":  "0112",
+        "description":  "CULTIVO DE ARROZ."
+    },
+    {
+        "code":  "0113",
+        "description":  "CULTIVO DE HORTALIZAS, RAICES Y TUBERCULOS."
+    },
+    {
+        "code":  "0114",
+        "description":  "CULTIVO DE TABACO."
+    },
+    {
+        "code":  "0115",
+        "description":  "CULTIVO DE PLANTAS TEXTILES."
+    },
+    {
+        "code":  "0119",
+        "description":  "OTROS CULTIVOS TRANSITORIOS N.C.P."
+    },
+    {
+        "code":  "0121",
+        "description":  "CULTIVO DE FRUTAS TROPICALES Y SUBTROPICALES."
+    },
+    {
+        "code":  "0122",
+        "description":  "CULTIVO DE PLATANO Y BANANO."
+    },
+    {
+        "code":  "0123",
+        "description":  "CULTIVO DE CAFE."
+    },
+    {
+        "code":  "0124",
+        "description":  "CULTIVO DE CAÑA DE AZUCAR."
+    },
+    {
+        "code":  "0125",
+        "description":  "CULTIVO DE FLOR DE CORTE."
+    },
+    {
+        "code":  "0126",
+        "description":  "CULTIVO DE PALMA PARA ACEITE (PALMA AFRICANA) Y OTROS FRUTOS OLEAGINOSOS."
+    },
+    {
+        "code":  "0127",
+        "description":  "CULTIVO DE PLANTAS CON LAS QUE SE PREPARAN BEBIDAS."
+    },
+    {
+        "code":  "0128",
+        "description":  "CULTIVO DE ESPECIAS Y DE PLANTAS AROMATICAS Y MEDICINALES."
+    },
+    {
+        "code":  "0129",
+        "description":  "OTROS CULTIVOS PERMANENTES N.C.P."
+    },
+    {
+        "code":  "0130",
+        "description":  "PROPAGACION DE PLANTAS (ACTIVIDADES DE LOS VIVEROS, EXCEPTO VIVEROS FORESTALES)."
+    },
+    {
+        "code":  "0141",
+        "description":  "CRIA DE GANADO BOVINO Y BUFALINO."
+    },
+    {
+        "code":  "0142",
+        "description":  "CRIA DE CABALLOS Y OTROS EQUINOS."
+    },
+    {
+        "code":  "0143",
+        "description":  "CRIA DE OVEJAS Y CABRAS."
+    },
+    {
+        "code":  "0144",
+        "description":  "CRIA DE GANADO PORCINO."
+    },
+    {
+        "code":  "0145",
+        "description":  "CRIA DE AVES DE CORRAL."
+    },
+    {
+        "code":  "0149",
+        "description":  "CRIA DE OTROS ANIMALES N.C.P."
+    },
+    {
+        "code":  "0150",
+        "description":  "EXPLOTACION MIXTA (AGRICOLA Y PECUARIA)."
+    },
+    {
+        "code":  "0161",
+        "description":  "ACTIVIDADES DE APOYO A LA AGRICULTURA."
+    },
+    {
+        "code":  "0162",
+        "description":  "ACTIVIDADES DE APOYO A LA GANADERIA."
+    },
+    {
+        "code":  "0163",
+        "description":  "ACTIVIDADES POSTERIORES A LA COSECHA."
+    },
+    {
+        "code":  "0164",
+        "description":  "TRATAMIENTO DE SEMILLAS PARA PROPAGACION."
+    },
+    {
+        "code":  "0170",
+        "description":  "CAZA ORDINARIA Y MEDIANTE TRAMPAS Y ACTIVIDADES DE SERVICIOS CONEXAS."
+    },
+    {
+        "code":  "0210",
+        "description":  "SILVICULTURA Y OTRAS ACTIVIDADES FORESTALES."
+    },
+    {
+        "code":  "0220",
+        "description":  "EXTRACCION DE MADERA."
+    },
+    {
+        "code":  "0230",
+        "description":  "RECOLECCION DE PRODUCTOS FORESTALES DIFERENTES A LA MADERA."
+    },
+    {
+        "code":  "0240",
+        "description":  "SERVICIOS DE APOYO A LA SILVICULTURA."
+    },
+    {
+        "code":  "0311",
+        "description":  "PESCA MARITIMA."
+    },
+    {
+        "code":  "0312",
+        "description":  "PESCA DE AGUA DULCE."
+    },
+    {
+        "code":  "0321",
+        "description":  "ACUICULTURA MARITIMA."
+    },
+    {
+        "code":  "0322",
+        "description":  "ACUICULTURA DE AGUA DULCE."
+    },
+    {
+        "code":  "0510",
+        "description":  "EXTRACCION DE HULLA (CARBON DE PIEDRA)."
+    },
+    {
+        "code":  "0520",
+        "description":  "EXTRACCION DE CARBON LIGNITO."
+    },
+    {
+        "code":  "0610",
+        "description":  "EXTRACCION DE PETROLEO CRUDO."
+    },
+    {
+        "code":  "0620",
+        "description":  "EXTRACCION DE GAS NATURAL."
+    },
+    {
+        "code":  "0710",
+        "description":  "EXTRACCION DE MINERALES DE HIERRO."
+    },
+    {
+        "code":  "0721",
+        "description":  "EXTRACCION DE MINERALES DE URANIO Y DE TORIO."
+    },
+    {
+        "code":  "0722",
+        "description":  "EXTRACCION DE ORO Y OTROS METALES PRECIOSOS."
+    },
+    {
+        "code":  "0723",
+        "description":  "EXTRACCION DE MINERALES DE NIQUEL."
+    },
+    {
+        "code":  "0729",
+        "description":  "EXTRACCION DE OTROS MINERALES METALIFEROS NO FERROSOS N.C.P."
+    },
+    {
+        "code":  "0811",
+        "description":  "EXTRACCION DE PIEDRA, ARENA, ARCILLAS COMUNES, YESO Y ANHIDRITA."
+    },
+    {
+        "code":  "0812",
+        "description":  "EXTRACCION DE ARCILLAS DE USO INDUSTRIAL, CALIZA, CAOLIN Y BENTONITAS."
+    },
+    {
+        "code":  "0820",
+        "description":  "EXTRACCION DE ESMERALDAS, PIEDRAS PRECIOSAS Y SEMIPRECIOSAS."
+    },
+    {
+        "code":  "0891",
+        "description":  "EXTRACCION DE MINERALES PARA LA FABRICACION DE ABONOS Y PRODUCTOS QUIMICOS."
+    },
+    {
+        "code":  "0892",
+        "description":  "EXTRACCION DE HALITA (SAL)."
+    },
+    {
+        "code":  "0899",
+        "description":  "EXTRACCION DE OTROS MINERALES NO METALICOS N.C.P."
+    },
+    {
+        "code":  "0910",
+        "description":  "ACTIVIDADES DE APOYO PARA LA EXTRACCION DE PETROLEO Y DE GAS NATURAL."
+    },
+    {
+        "code":  "0990",
+        "description":  "ACTIVIDADES DE APOYO PARA OTRAS ACTIVIDADES DE EXPLOTACION DE MINAS Y CANTERAS."
+    },
+    {
+        "code":  "1011",
+        "description":  "PROCESAMIENTO Y CONSERVACION DE CARNE Y PRODUCTOS CARNICOS."
+    },
+    {
+        "code":  "1012",
+        "description":  "PROCESAMIENTO Y CONSERVACION DE PESCADOS, CRUSTACEOS Y MOLUSCOS."
+    },
+    {
+        "code":  "1020",
+        "description":  "PROCESAMIENTO Y CONSERVACION DE FRUTAS, LEGUMBRES, HORTALIZAS Y TUBERCULOS."
+    },
+    {
+        "code":  "1030",
+        "description":  "ELABORACION DE ACEITES Y GRASAS DE ORIGEN VEGETAL Y ANIMAL."
+    },
+    {
+        "code":  "1040",
+        "description":  "ELABORACION DE PRODUCTOS LACTEOS."
+    },
+    {
+        "code":  "1051",
+        "description":  "ELABORACION DE PRODUCTOS DE MOLINERIA."
+    },
+    {
+        "code":  "1052",
+        "description":  "ELABORACION DE ALMIDONES Y PRODUCTOS DERIVADOS DEL ALMIDON."
+    },
+    {
+        "code":  "1061",
+        "description":  "TRILLA DE CAFE."
+    },
+    {
+        "code":  "1062",
+        "description":  "DESCAFEINADO, TOSTION Y MOLIENDA DEL CAFE."
+    },
+    {
+        "code":  "1063",
+        "description":  "OTROS DERIVADOS DEL CAFE."
+    },
+    {
+        "code":  "1071",
+        "description":  "ELABORACION Y REFINACION DE AZUCAR."
+    },
+    {
+        "code":  "1072",
+        "description":  "ELABORACION DE PANELA."
+    },
+    {
+        "code":  "1081",
+        "description":  "ELABORACION DE PRODUCTOS DE PANADERIA."
+    },
+    {
+        "code":  "1082",
+        "description":  "ELABORACION DE CACAO, CHOCOLATE Y PRODUCTOS DE CONFITERIA."
+    },
+    {
+        "code":  "1083",
+        "description":  "ELABORACION DE MACARRONES, FIDEOS, ALCUZCUZ Y PRODUCTOS FARINACEOS SIMILARES."
+    },
+    {
+        "code":  "1084",
+        "description":  "ELABORACION DE COMIDAS Y PLATOS PREPARADOS."
+    },
+    {
+        "code":  "1089",
+        "description":  "ELABORACION DE OTROS PRODUCTOS ALIMENTICIOS N.C.P."
+    },
+    {
+        "code":  "1090",
+        "description":  "ELABORACION DE ALIMENTOS PREPARADOS PARA ANIMALES."
+    },
+    {
+        "code":  "1101",
+        "description":  "DESTILACION, RECTIFICACION Y MEZCLA DE BEBIDAS ALCOHOLICAS."
+    },
+    {
+        "code":  "1102",
+        "description":  "ELABORACION DE BEBIDAS FERMENTADAS NO DESTILADAS."
+    },
+    {
+        "code":  "1103",
+        "description":  "PRODUCCION DE MALTA, ELABORACION DE CERVEZAS Y OTRAS BEBIDAS MALTEADAS."
+    },
+    {
+        "code":  "1104",
+        "description":  "ELABORACION DE BEBIDAS NO ALCOHOLICAS, PRODUCCION DE AGUAS MINERALES Y DE OTRAS AGUAS EMBOTELLADAS."
+    },
+    {
+        "code":  "1200",
+        "description":  "ELABORACION DE PRODUCTOS DE TABACO."
+    },
+    {
+        "code":  "1311",
+        "description":  "PREPARACION E HILATURA DE FIBRAS TEXTILES."
+    },
+    {
+        "code":  "1312",
+        "description":  "TEJEDURIA DE PRODUCTOS TEXTILES."
+    },
+    {
+        "code":  "1313",
+        "description":  "ACABADO DE PRODUCTOS TEXTILES."
+    },
+    {
+        "code":  "1391",
+        "description":  "FABRICACION DE TEJIDOS DE PUNTO Y GANCHILLO."
+    },
+    {
+        "code":  "1392",
+        "description":  "CONFECCION DE ARTICULOS CON MATERIALES TEXTILES, EXCEPTO PRENDAS DE VESTIR."
+    },
+    {
+        "code":  "1393",
+        "description":  "FABRICACION DE TAPETES Y ALFOMBRAS PARA PISOS."
+    },
+    {
+        "code":  "1394",
+        "description":  "FABRICACION DE CUERDAS, CORDELES, CABLES, BRAMANTES Y REDES."
+    },
+    {
+        "code":  "1399",
+        "description":  "FABRICACION DE OTROS ARTICULOS TEXTILES N.C.P."
+    },
+    {
+        "code":  "1410",
+        "description":  "CONFECCION DE PRENDAS DE VESTIR, EXCEPTO PRENDAS DE PIEL."
+    },
+    {
+        "code":  "1420",
+        "description":  "FABRICACION DE ARTICULOS DE PIEL."
+    },
+    {
+        "code":  "1430",
+        "description":  "FABRICACION DE ARTICULOS DE PUNTO Y GANCHILLO."
+    },
+    {
+        "code":  "1511",
+        "description":  "CURTIDO Y RECURTIDO DE CUEROS"
+    },
+    {
+        "code":  "1512",
+        "description":  "FABRICACION DE ARTICULOS DE VIAJE, BOLSOS DE MANO Y ARTICULOS SIMILARES ELABORADOS EN CUERO, Y FABRICACION DE ARTICULOS DE TALABARTERIA Y GUARNICIONERIA."
+    },
+    {
+        "code":  "1513",
+        "description":  "FABRICACION DE ARTICULOS DE VIAJE, BOLSOS DE MANO Y ARTICULOS SIMILARES"
+    },
+    {
+        "code":  "1521",
+        "description":  "FABRICACION DE CALZADO DE CUERO Y PIEL, CON CUALQUIER TIPO DE SUELA."
+    },
+    {
+        "code":  "1522",
+        "description":  "FABRICACION DE OTROS TIPOS DE CALZADO, EXCEPTO CALZADO DE CUERO Y PIEL."
+    },
+    {
+        "code":  "1523",
+        "description":  "FABRICACION DE PARTES DEL CALZADO."
+    },
+    {
+        "code":  "1610",
+        "description":  "ASERRADO, ACEPILLADO E IMPREGNACION DE LA MADERA."
+    },
+    {
+        "code":  "1620",
+        "description":  "FABRICACION DE HOJAS DE MADERA PARA ENCHAPADO"
+    },
+    {
+        "code":  "1630",
+        "description":  "FABRICACION DE PARTES Y PIEZAS DE MADERA, DE CARPINTERIA Y EBANISTERIA PARA LA CONSTRUCCION."
+    },
+    {
+        "code":  "1640",
+        "description":  "FABRICACION DE RECIPIENTES DE MADERA."
+    },
+    {
+        "code":  "1690",
+        "description":  "FABRICACION DE OTROS PRODUCTOS DE MADERA"
+    },
+    {
+        "code":  "1701",
+        "description":  "FABRICACION DE PULPAS (PASTAS) CELULOSICAS"
+    },
+    {
+        "code":  "2410",
+        "description":  "INDUSTRIAS BASICAS DE HIERRO Y DE ACERO."
+    },
+    {
+        "code":  "2421",
+        "description":  "INDUSTRIAS BASICAS DE METALES PRECIOSOS."
+    },
+    {
+        "code":  "2429",
+        "description":  "INDUSTRIAS BASICAS DE OTROS METALES NO FERROSOS."
+    },
+    {
+        "code":  "2431",
+        "description":  "FUNDICION DE HIERRO Y DE ACERO."
+    },
+    {
+        "code":  "2432",
+        "description":  "FUNDICION DE METALES NO FERROSOS."
+    },
+    {
+        "code":  "2511",
+        "description":  "FABRICACION DE PRODUCTOS METALICOS PARA USO ESTRUCTURAL."
+    },
+    {
+        "code":  "2512",
+        "description":  "FABRICACION DE TANQUES, DEPOSITOS Y RECIPIENTES DE METAL, EXCEPTO LOS UTILIZADOS PARA EL ENVASE O TRANSPORTE DE MERCANCIAS."
+    },
+    {
+        "code":  "2513",
+        "description":  "FABRICACION DE GENERADORES DE VAPOR, EXCEPTO CALDERAS DE AGUA CALIENTE PARA CALEFACCION CENTRAL."
+    },
+    {
+        "code":  "2520",
+        "description":  "FABRICACION DE ARMAS Y MUNICIONES."
+    },
+    {
+        "code":  "2591",
+        "description":  "FORJA, PRENSADO, ESTAMPADO Y LAMINADO DE METAL"
+    },
+    {
+        "code":  "2592",
+        "description":  "TRATAMIENTO Y REVESTIMIENTO DE METALES"
+    },
+    {
+        "code":  "2593",
+        "description":  "FABRICACION DE ARTICULOS DE CUCHILLERIA, HERRAMIENTAS DE MANO Y ARTICULOS DE FERRETERIA."
+    },
+    {
+        "code":  "2599",
+        "description":  "FABRICACION DE OTROS PRODUCTOS ELABORADOS DE METAL N.C.P."
+    },
+    {
+        "code":  "2610",
+        "description":  "FABRICACION DE COMPONENTES Y TABLEROS ELECTRONICOS."
+    },
+    {
+        "code":  "2620",
+        "description":  "FABRICACION DE COMPUTADORAS Y DE EQUIPO PERIFERICO."
+    },
+    {
+        "code":  "2630",
+        "description":  "FABRICACION DE EQUIPOS DE COMUNICACION."
+    },
+    {
+        "code":  "1702",
+        "description":  "FABRICACION DE PAPEL Y CARTON ONDULADO (CORRUGADO)"
+    },
+    {
+        "code":  "1709",
+        "description":  "FABRICACION DE OTROS ARTICULOS DE PAPEL Y CARTON."
+    },
+    {
+        "code":  "1811",
+        "description":  "ACTIVIDADES DE IMPRESION."
+    },
+    {
+        "code":  "1812",
+        "description":  "ACTIVIDADES DE SERVICIOS RELACIONADOS CON LA IMPRESION."
+    },
+    {
+        "code":  "1820",
+        "description":  "PRODUCCION DE COPIAS A PARTIR DE GRABACIONES ORIGINALES."
+    },
+    {
+        "code":  "1910",
+        "description":  "FABRICACION DE PRODUCTOS DE HORNOS DE COQUE."
+    },
+    {
+        "code":  "1921",
+        "description":  "FABRICACION DE PRODUCTOS DE LA REFINACION DEL PETROLEO."
+    },
+    {
+        "code":  "1922",
+        "description":  "ACTIVIDAD DE MEZCLA DE COMBUSTIBLES."
+    },
+    {
+        "code":  "2011",
+        "description":  "FABRICACION DE SUSTANCIAS Y PRODUCTOS QUIMICOS BASICOS."
+    },
+    {
+        "code":  "2012",
+        "description":  "FABRICACION DE ABONOS Y COMPUESTOS INORGANICOS NITROGENADOS."
+    },
+    {
+        "code":  "2013",
+        "description":  "FABRICACION DE PLASTICOS EN FORMAS PRIMARIAS."
+    },
+    {
+        "code":  "2014",
+        "description":  "FABRICACION DE CAUCHO SINTETICO EN FORMAS PRIMARIAS."
+    },
+    {
+        "code":  "2021",
+        "description":  "FABRICACION DE PLAGUICIDAS Y OTROS PRODUCTOS QUIMICOS DE USO AGROPECUARIO."
+    },
+    {
+        "code":  "2022",
+        "description":  "FABRICACION DE PINTURAS, BARNICES Y REVESTIMIENTOS SIMILARES, TINTAS PARA IMPRESION Y MASILLAS."
+    },
+    {
+        "code":  "2023",
+        "description":  "FABRICACION DE JABONES Y DETERGENTES, PREPARADOS PARA LIMPIAR Y PULIR"
+    },
+    {
+        "code":  "2029",
+        "description":  "FABRICACION DE OTROS PRODUCTOS QUIMICOS N.C.P."
+    },
+    {
+        "code":  "2030",
+        "description":  "FABRICACION DE FIBRAS SINTETICAS Y ARTIFICIALES."
+    },
+    {
+        "code":  "2100",
+        "description":  "FABRICACION DE PRODUCTOS FARMACEUTICOS, SUSTANCIAS QUIMICAS MEDICINALES Y PRODUCTOS BOTANICOS DE USO FARMACEUTICO."
+    },
+    {
+        "code":  "2211",
+        "description":  "FABRICACION DE LLANTAS Y NEUMATICOS DE CAUCHO"
+    },
+    {
+        "code":  "2212",
+        "description":  "REENCAUCHE DE LLANTAS USADAS"
+    },
+    {
+        "code":  "2219",
+        "description":  "FABRICACION DE FORMAS BASICAS DE CAUCHO Y OTROS PRODUCTOS DE CAUCHO N.C.P."
+    },
+    {
+        "code":  "2221",
+        "description":  "FABRICACION DE FORMAS BASICAS DE PLASTICO."
+    },
+    {
+        "code":  "2229",
+        "description":  "FABRICACION DE ARTICULOS DE PLASTICO N.C.P."
+    },
+    {
+        "code":  "2310",
+        "description":  "FABRICACION DE VIDRIO Y PRODUCTOS DE VIDRIO."
+    },
+    {
+        "code":  "2391",
+        "description":  "FABRICACION DE PRODUCTOS REFRACTARIOS."
+    },
+    {
+        "code":  "2392",
+        "description":  "FABRICACION DE MATERIALES DE ARCILLA PARA LA CONSTRUCCION."
+    },
+    {
+        "code":  "2393",
+        "description":  "FABRICACION DE OTROS PRODUCTOS DE CERAMICA Y PORCELANA."
+    },
+    {
+        "code":  "2394",
+        "description":  "FABRICACION DE CEMENTO, CAL Y YESO."
+    },
+    {
+        "code":  "2395",
+        "description":  "FABRICACION DE ARTICULOS DE HORMIGON, CEMENTO Y YESO."
+    },
+    {
+        "code":  "2396",
+        "description":  "CORTE, TALLADO Y ACABADO DE LA PIEDRA."
+    },
+    {
+        "code":  "2399",
+        "description":  "FABRICACION DE OTROS PRODUCTOS MINERALES NO METALICOS N.C.P."
+    },
+    {
+        "code":  "9420",
+        "description":  "ACTIVIDADES DE SINDICATOS DE EMPLEADOS."
+    },
+    {
+        "code":  "9491",
+        "description":  "ACTIVIDADES DE ASOCIACIONES RELIGIOSAS."
+    },
+    {
+        "code":  "9492",
+        "description":  "ACTIVIDADES DE ASOCIACIONES POLITICAS."
+    },
+    {
+        "code":  "9499",
+        "description":  "ACTIVIDADES DE OTRAS ASOCIACIONES N.C.P."
+    },
+    {
+        "code":  "9511",
+        "description":  "MANTENIMIENTO Y REPARACION DE COMPUTADORES Y DE EQUIPO PERIFERICO."
+    },
+    {
+        "code":  "9512",
+        "description":  "MANTENIMIENTO Y REPARACION DE EQUIPOS DE COMUNICACION."
+    },
+    {
+        "code":  "9521",
+        "description":  "MANTENIMIENTO Y REPARACION DE APARATOS ELECTRONICOS DE CONSUMO."
+    },
+    {
+        "code":  "9522",
+        "description":  "MANTENIMIENTO Y REPARACION DE APARATOS Y EQUIPOS DOMESTICOS Y DE JARDINERIA."
+    },
+    {
+        "code":  "9523",
+        "description":  "REPARACION DE CALZADO Y ARTICULOS DE CUERO."
+    },
+    {
+        "code":  "9524",
+        "description":  "REPARACION DE MUEBLES Y ACCESORIOS PARA EL HOGAR."
+    },
+    {
+        "code":  "9529",
+        "description":  "MANTENIMIENTO Y REPARACION DE OTROS EFECTOS PERSONALES Y ENSERES DOMESTICOS."
+    },
+    {
+        "code":  "9601",
+        "description":  "LAVADO Y LIMPIEZA, INCLUSO LA LIMPIEZA EN SECO, DE PRODUCTOS TEXTILES Y DE PIEL."
+    },
+    {
+        "code":  "9602",
+        "description":  "PELUQUERIA Y OTROS TRATAMIENTOS DE BELLEZA."
+    },
+    {
+        "code":  "9603",
+        "description":  "POMPAS FUNEBRES Y ACTIVIDADES RELACIONADAS."
+    },
+    {
+        "code":  "9609",
+        "description":  "OTRAS ACTIVIDADES DE SERVICIOS PERSONALES N.C.P."
+    },
+    {
+        "code":  "9700",
+        "description":  "ACTIVIDADES DE LOS HOGARES INDIVIDUALES COMO EMPLEADORES DE PERSONAL DOMESTICO."
+    },
+    {
+        "code":  "9810",
+        "description":  "ACTIVIDADES NO DIFERENCIADAS DE LOS HOGARES INDIVIDUALES COMO PRODUCTORES DE BIENES PARA USO PROPIO."
+    },
+    {
+        "code":  "9820",
+        "description":  "ACTIVIDADES NO DIFERENCIADAS DE LOS HOGARES INDIVIDUALES COMO PRODUCTORES DE SERVICIOS PARA USO PROPIO."
+    },
+    {
+        "code":  "9900",
+        "description":  "ACTIVIDADES DE ORGANIZACIONES Y ENTIDADES EXTRATERRITORIALES."
+    },
+    {
+        "code":  "4643",
+        "description":  "COMERCIO AL POR MAYOR DE CALZADO."
+    },
+    {
+        "code":  "4644",
+        "description":  "COMERCIO AL POR MAYOR DE APARATOS Y EQUIPO DE USO DOMESTICO."
+    },
+    {
+        "code":  "4645",
+        "description":  "COMERCIO AL POR MAYOR DE PRODUCTOS FARMACEUTICOS, MEDICINALES, COSMETICOS Y DE TOCADOR."
+    },
+    {
+        "code":  "4649",
+        "description":  "COMERCIO AL POR MAYOR DE OTROS UTENSILIOS DOMESTICOS N.C.P."
+    },
+    {
+        "code":  "4651",
+        "description":  "COMERCIO AL POR MAYOR DE COMPUTADORES, EQUIPO PERIFERICO Y PROGRAMAS DE INFORMATICA."
+    },
+    {
+        "code":  "4652",
+        "description":  "COMERCIO AL POR MAYOR DE EQUIPO, PARTES Y PIEZAS ELECTRONICOS Y DE TELECOMUNICACIONES."
+    },
+    {
+        "code":  "4653",
+        "description":  "COMERCIO AL POR MAYOR DE MAQUINARIA Y EQUIPO AGROPECUARIOS."
+    },
+    {
+        "code":  "4659",
+        "description":  "COMERCIO AL POR MAYOR DE OTROS TIPOS DE MAQUINARIA Y EQUIPO N.C.P."
+    },
+    {
+        "code":  "4661",
+        "description":  "COMERCIO AL POR MAYOR DE COMBUSTIBLES SOLIDOS, LIQUIDOS, GASEOSOS Y PRODUCTOS CONEXOS."
+    },
+    {
+        "code":  "4662",
+        "description":  "COMERCIO AL POR MAYOR DE METALES Y PRODUCTOS METALIFEROS."
+    },
+    {
+        "code":  "4663",
+        "description":  "COMERCIO AL POR MAYOR DE MATERIALES DE CONSTRUCCION, ARTICULOS DE FERRETERIA, PINTURAS, PRODUCTOS DE VIDRIO, EQUIPO Y MATERIALES DE FONTANERIA Y CALEFACCION."
+    },
+    {
+        "code":  "4664",
+        "description":  "COMERCIO AL POR MAYOR DE PRODUCTOS QUIMICOS BASICOS, CAUCHOS Y PLASTICOS EN FORMAS PRIMARIAS Y PRODUCTOS QUIMICOS DE USO AGROPECUARIO."
+    },
+    {
+        "code":  "4665",
+        "description":  "COMERCIO AL POR MAYOR DE DESPERDICIOS, DESECHOS Y CHATARRA."
+    },
+    {
+        "code":  "4669",
+        "description":  "COMERCIO AL POR MAYOR DE OTROS PRODUCTOS N.C.P."
+    },
+    {
+        "code":  "4690",
+        "description":  "COMERCIO AL POR MAYOR NO ESPECIALIZADO."
+    },
+    {
+        "code":  "4711",
+        "description":  "COMERCIO AL POR MENOR EN ESTABLECIMIENTOS NO ESPECIALIZADOS CON SURTIDO COMPUESTO PRINCIPALMENTE POR ALIMENTOS, BEBIDAS O TABACO."
+    },
+    {
+        "code":  "4719",
+        "description":  "COMERCIO AL POR MENOR EN ESTABLECIMIENTOS NO ESPECIALIZADOS, CON SURTIDO COMPUESTO PRINCIPALMENTE POR PRODUCTOS DIFERENTES DE ALIMENTOS (VIVERES EN GENERAL), BEBIDAS Y TABACO."
+    },
+    {
+        "code":  "4721",
+        "description":  "COMERCIO AL POR MENOR DE PRODUCTOS AGRICOLAS PARA EL CONSUMO EN ESTABLECIMIENTOS ESPECIALIZADOS."
+    },
+    {
+        "code":  "4722",
+        "description":  "COMERCIO AL POR MENOR DE LECHE, PRODUCTOS LACTEOS Y HUEVOS, EN ESTABLECIMIENTOS ESPECIALIZADOS."
+    },
+    {
+        "code":  "4723",
+        "description":  "COMERCIO AL POR MENOR DE CARNES (INCLUYE AVES DE CORRAL), PRODUCTOS CARNICOS, PESCADOS Y PRODUCTOS DE MAR, EN ESTABLECIMIENTOS ESPECIALIZADOS."
+    },
+    {
+        "code":  "4724",
+        "description":  "COMERCIO AL POR MENOR DE BEBIDAS Y PRODUCTOS DEL TABACO, EN ESTABLECIMIENTOS ESPECIALIZADOS."
+    },
+    {
+        "code":  "4729",
+        "description":  "COMERCIO AL POR MENOR DE OTROS PRODUCTOS ALIMENTICIOS N.C.P., EN ESTABLECIMIENTOS ESPECIALIZADOS."
+    },
+    {
+        "code":  "4731",
+        "description":  "COMERCIO AL POR MENOR DE COMBUSTIBLE PARA AUTOMOTORES."
+    },
+    {
+        "code":  "4732",
+        "description":  "COMERCIO AL POR MENOR DE LUBRICANTES (ACEITES, GRASAS), ADITIVOS Y PRODUCTOS DE LIMPIEZA PARA VEHICULOS AUTOMOTORES."
+    },
+    {
+        "code":  "4741",
+        "description":  "COMERCIO AL POR MENOR DE COMPUTADORES, EQUIPOS PERIFERICOS, PROGRAMAS DE INFORMATICA Y EQUIPOS DE TELECOMUNICACIONES EN ESTABLECIMIENTOS ESPECIALIZADOS."
+    },
+    {
+        "code":  "4742",
+        "description":  "COMERCIO AL POR MENOR DE EQUIPOS Y APARATOS DE SONIDO Y DE VIDEO, EN ESTABLECIMIENTOS ESPECIALIZADOS."
+    },
+    {
+        "code":  "4751",
+        "description":  "COMERCIO AL POR MENOR DE PRODUCTOS TEXTILES EN ESTABLECIMIENTOS ESPECIALIZADOS."
+    },
+    {
+        "code":  "4752",
+        "description":  "COMERCIO AL POR MENOR DE ARTICULOS DE FERRETERIA, PINTURAS Y PRODUCTOS DE VIDRIO EN ESTABLECIMIENTOS ESPECIALIZADOS."
+    },
+    {
+        "code":  "4753",
+        "description":  "COMERCIO AL POR MENOR DE TAPICES, ALFOMBRAS Y CUBRIMIENTOS PARA PAREDES Y PISOS EN ESTABLECIMIENTOS ESPECIALIZADOS."
+    },
+    {
+        "code":  "4754",
+        "description":  "COMERCIO AL POR MENOR DE ELECTRODOMESTICOS Y GASODOMESTICOS DE USO DOMESTICO, MUEBLES Y EQUIPOS DE ILUMINACION."
+    },
+    {
+        "code":  "4755",
+        "description":  "COMERCIO AL POR MENOR DE ARTICULOS Y UTENSILIOS DE USO DOMESTICO."
+    },
+    {
+        "code":  "4759",
+        "description":  "COMERCIO AL POR MENOR DE OTROS ARTICULOS DOMESTICOS EN ESTABLECIMIENTOS ESPECIALIZADOS."
+    },
+    {
+        "code":  "4761",
+        "description":  "COMERCIO AL POR MENOR DE LIBROS, PERIODICOS, MATERIALES Y ARTICULOS DE PAPELERIA Y ESCRITORIO, EN ESTABLECIMIENTOS ESPECIALIZADOS."
+    },
+    {
+        "code":  "4762",
+        "description":  "COMERCIO AL POR MENOR DE ARTICULOS DEPORTIVOS, EN ESTABLECIMIENTOS ESPECIALIZADOS."
+    },
+    {
+        "code":  "4769",
+        "description":  "COMERCIO AL POR MENOR DE OTROS ARTICULOS CULTURALES Y DE ENTRETENIMIENTO N.C.P. EN ESTABLECIMIENTOS ESPECIALIZADOS."
+    },
+    {
+        "code":  "4771",
+        "description":  "COMERCIO AL POR MENOR DE PRENDAS DE VESTIR Y SUS ACCESORIOS (INCLUYE ARTICULOS DE PIEL) EN ESTABLECIMIENTOS ESPECIALIZADOS."
+    },
+    {
+        "code":  "4772",
+        "description":  "COMERCIO AL POR MENOR DE TODO TIPO DE CALZADO Y ARTICULOS DE CUERO Y SUCEDANEOS DEL CUERO EN ESTABLECIMIENTOS ESPECIALIZADOS."
+    },
+    {
+        "code":  "4773",
+        "description":  "COMERCIO AL POR MENOR DE PRODUCTOS FARMACEUTICOS Y MEDICINALES, COSMETICOS Y ARTICULOS DE TOCADOR EN ESTABLECIMIENTOS ESPECIALIZADOS."
+    },
+    {
+        "code":  "4774",
+        "description":  "COMERCIO AL POR MENOR DE OTROS PRODUCTOS NUEVOS EN ESTABLECIMIENTOS ESPECIALIZADOS."
+    },
+    {
+        "code":  "4775",
+        "description":  "COMERCIO AL POR MENOR DE ARTICULOS DE SEGUNDA MANO."
+    },
+    {
+        "code":  "4781",
+        "description":  "COMERCIO AL POR MENOR DE ALIMENTOS, BEBIDAS Y TABACO, EN PUESTOS DE VENTA MOVILES."
+    },
+    {
+        "code":  "4782",
+        "description":  "COMERCIO AL POR MENOR DE PRODUCTOS TEXTILES, PRENDAS DE VESTIR Y CALZADO, EN PUESTOS DE VENTA MOVILES."
+    },
+    {
+        "code":  "4789",
+        "description":  "COMERCIO AL POR MENOR DE OTROS PRODUCTOS EN PUESTOS DE VENTA MOVILES."
+    },
+    {
+        "code":  "4791",
+        "description":  "COMERCIO AL POR MENOR REALIZADO A TRAVES DE INTERNET."
+    },
+    {
+        "code":  "4792",
+        "description":  "COMERCIO AL POR MENOR REALIZADO A TRAVES DE CASAS DE VENTA O POR CORREO."
+    },
+    {
+        "code":  "4799",
+        "description":  "OTROS TIPOS DE COMERCIO AL POR MENOR NO REALIZADO EN ESTABLECIMIENTOS, PUESTOS DE VENTA O MERCADOS."
+    },
+    {
+        "code":  "4911",
+        "description":  "TRANSPORTE FERREO DE PASAJEROS."
+    },
+    {
+        "code":  "4912",
+        "description":  "TRANSPORTE FERREO DE CARGA."
+    },
+    {
+        "code":  "4921",
+        "description":  "TRANSPORTE DE PASAJEROS."
+    },
+    {
+        "code":  "4922",
+        "description":  "TRANSPORTE MIXTO."
+    },
+    {
+        "code":  "4923",
+        "description":  "TRANSPORTE DE CARGA POR CARRETERA."
+    },
+    {
+        "code":  "4930",
+        "description":  "TRANSPORTE POR TUBERIAS."
+    },
+    {
+        "code":  "5011",
+        "description":  "TRANSPORTE DE PASAJEROS MARITIMO Y DE CABOTAJE."
+    },
+    {
+        "code":  "5012",
+        "description":  "TRANSPORTE DE CARGA MARITIMO Y DE CABOTAJE."
+    },
+    {
+        "code":  "5021",
+        "description":  "TRANSPORTE FLUVIAL DE PASAJEROS."
+    },
+    {
+        "code":  "5022",
+        "description":  "TRANSPORTE FLUVIAL DE CARGA."
+    },
+    {
+        "code":  "5111",
+        "description":  "TRANSPORTE AEREO NACIONAL DE PASAJEROS."
+    },
+    {
+        "code":  "5112",
+        "description":  "TRANSPORTE AEREO INTERNACIONAL DE PASAJEROS."
+    },
+    {
+        "code":  "5121",
+        "description":  "TRANSPORTE AEREO NACIONAL DE CARGA."
+    },
+    {
+        "code":  "5122",
+        "description":  "TRANSPORTE AEREO INTERNACIONAL DE CARGA."
+    },
+    {
+        "code":  "5210",
+        "description":  "ALMACENAMIENTO Y DEPOSITO."
+    },
+    {
+        "code":  "5221",
+        "description":  "ACTIVIDADES DE ESTACIONES, VIAS Y SERVICIOS COMPLEMENTARIOS PARA EL TRANSPORTE TERRESTRE."
+    },
+    {
+        "code":  "5222",
+        "description":  "ACTIVIDADES DE PUERTOS Y SERVICIOS COMPLEMENTARIOS PARA EL TRANSPORTE ACUATICO."
+    },
+    {
+        "code":  "5223",
+        "description":  "ACTIVIDADES DE AEROPUERTOS, SERVICIOS DE NAVEGACION AEREA Y DEMAS ACTIVIDADES CONEXAS AL TRANSPORTE AEREO."
+    },
+    {
+        "code":  "5224",
+        "description":  "MANIPULACION DE CARGA."
+    },
+    {
+        "code":  "5229",
+        "description":  "OTRAS ACTIVIDADES COMPLEMENTARIAS AL TRANSPORTE."
+    },
+    {
+        "code":  "5310",
+        "description":  "ACTIVIDADES POSTALES NACIONALES."
+    },
+    {
+        "code":  "5320",
+        "description":  "ACTIVIDADES DE MENSAJERIA."
+    },
+    {
+        "code":  "5511",
+        "description":  "ALOJAMIENTO EN HOTELES."
+    },
+    {
+        "code":  "5512",
+        "description":  "ALOJAMIENTO EN APARTAHOTELES."
+    },
+    {
+        "code":  "5513",
+        "description":  "ALOJAMIENTO EN CENTROS VACACIONALES."
+    },
+    {
+        "code":  "5514",
+        "description":  "ALOJAMIENTO RURAL."
+    },
+    {
+        "code":  "5519",
+        "description":  "OTROS TIPOS DE ALOJAMIENTOS PARA VISITANTES."
+    },
+    {
+        "code":  "5520",
+        "description":  "ACTIVIDADES DE ZONAS DE CAMPING Y PARQUES PARA VEHICULOS RECREACIONALES."
+    },
+    {
+        "code":  "5530",
+        "description":  "SERVICIO POR HORAS"
+    },
+    {
+        "code":  "5590",
+        "description":  "OTROS TIPOS DE ALOJAMIENTO N.C.P."
+    },
+    {
+        "code":  "5611",
+        "description":  "EXPENDIO A LA MESA DE COMIDAS PREPARADAS."
+    },
+    {
+        "code":  "5612",
+        "description":  "EXPENDIO POR AUTOSERVICIO DE COMIDAS PREPARADAS."
+    },
+    {
+        "code":  "5613",
+        "description":  "EXPENDIO DE COMIDAS PREPARADAS EN CAFETERIAS."
+    },
+    {
+        "code":  "5619",
+        "description":  "OTROS TIPOS DE EXPENDIO DE COMIDAS PREPARADAS N.C.P."
+    },
+    {
+        "code":  "5621",
+        "description":  "CATERING PARA EVENTOS."
+    },
+    {
+        "code":  "5629",
+        "description":  "ACTIVIDADES DE OTROS SERVICIOS DE COMIDAS."
+    },
+    {
+        "code":  "5630",
+        "description":  "EXPENDIO DE BEBIDAS ALCOHOLICAS PARA EL CONSUMO DENTRO DEL ESTABLECIMIENTO."
+    },
+    {
+        "code":  "5811",
+        "description":  "EDICION DE LIBROS."
+    },
+    {
+        "code":  "5812",
+        "description":  "EDICION DE DIRECTORIOS Y LISTAS DE CORREO."
+    },
+    {
+        "code":  "5813",
+        "description":  "EDICION DE PERIODICOS, REVISTAS Y OTRAS PUBLICACIONES PERIODICAS."
+    },
+    {
+        "code":  "5819",
+        "description":  "OTROS TRABAJOS DE EDICION."
+    },
+    {
+        "code":  "5820",
+        "description":  "EDICION DE PROGRAMAS DE INFORMATICA (SOFTWARE)."
+    },
+    {
+        "code":  "5911",
+        "description":  "ACTIVIDADES DE PRODUCCION DE PELICULAS CINEMATOGRAFICAS, VIDEOS, PROGRAMAS, ANUNCIOS Y COMERCIALES DE TELEVISION."
+    },
+    {
+        "code":  "5912",
+        "description":  "ACTIVIDADES DE POSPRODUCCION DE PELICULAS CINEMATOGRAFICAS, VIDEOS, PROGRAMAS, ANUNCIOS Y COMERCIALES DE TELEVISION."
+    },
+    {
+        "code":  "5913",
+        "description":  "ACTIVIDADES DE DISTRIBUCION DE PELICULAS CINEMATOGRAFICAS, VIDEOS, PROGRAMAS, ANUNCIOS Y COMERCIALES DE TELEVISION."
+    },
+    {
+        "code":  "5914",
+        "description":  "ACTIVIDADES DE EXHIBICION DE PELICULAS CINEMATOGRAFICAS Y VIDEOS."
+    },
+    {
+        "code":  "5920",
+        "description":  "ACTIVIDADES DE GRABACION DE SONIDO Y EDICION DE MUSICA."
+    },
+    {
+        "code":  "6010",
+        "description":  "ACTIVIDADES DE PROGRAMACION Y TRANSMISION EN EL SERVICIO DE RADIODIFUSION SONORA."
+    },
+    {
+        "code":  "6020",
+        "description":  "ACTIVIDADES DE PROGRAMACION Y TRANSMISION DE TELEVISION."
+    },
+    {
+        "code":  "6110",
+        "description":  "ACTIVIDADES DE TELECOMUNICACIONES ALAMBRICAS."
+    },
+    {
+        "code":  "6120",
+        "description":  "ACTIVIDADES DE TELECOMUNICACIONES INALAMBRICAS."
+    },
+    {
+        "code":  "6130",
+        "description":  "ACTIVIDADES DE TELECOMUNICACION SATELITAL."
+    },
+    {
+        "code":  "6190",
+        "description":  "OTRAS ACTIVIDADES DE TELECOMUNICACIONES."
+    },
+    {
+        "code":  "6201",
+        "description":  "ACTIVIDADES DE DESARROLLO DE SISTEMAS INFORMATICOS (PLANIFICACION, ANALISIS, DISEÑO, PROGRAMACION, PRUEBAS)."
+    },
+    {
+        "code":  "6202",
+        "description":  "ACTIVIDADES DE CONSULTORIA INFORMATICA Y ACTIVIDADES DE ADMINISTRACION DE INSTALACIONES INFORMATICAS."
+    },
+    {
+        "code":  "6209",
+        "description":  "OTRAS ACTIVIDADES DE TECNOLOGIAS DE INFORMACION Y ACTIVIDADES DE SERVICIOS INFORMATICOS."
+    },
+    {
+        "code":  "6311",
+        "description":  "PROCESAMIENTO DE DATOS, ALOJAMIENTO (HOSTING) Y ACTIVIDADES RELACIONADAS."
+    },
+    {
+        "code":  "6312",
+        "description":  "PORTALES WEB."
+    },
+    {
+        "code":  "6391",
+        "description":  "ACTIVIDADES DE AGENCIAS DE NOTICIAS."
+    },
+    {
+        "code":  "6399",
+        "description":  "OTRAS ACTIVIDADES DE SERVICIO DE INFORMACION N.C.P."
+    },
+    {
+        "code":  "6411",
+        "description":  "BANCO CENTRAL."
+    },
+    {
+        "code":  "6412",
+        "description":  "BANCOS COMERCIALES."
+    },
+    {
+        "code":  "6421",
+        "description":  "ACTIVIDADES DE LAS CORPORACIONES FINANCIERAS."
+    },
+    {
+        "code":  "6422",
+        "description":  "ACTIVIDADES DE LAS COMPAÑIAS DE FINANCIAMIENTO."
+    },
+    {
+        "code":  "6423",
+        "description":  "BANCA DE SEGUNDO PISO."
+    },
+    {
+        "code":  "6424",
+        "description":  "ACTIVIDADES DE LAS COOPERATIVAS FINANCIERAS."
+    },
+    {
+        "code":  "6431",
+        "description":  "FIDEICOMISOS, FONDOS Y ENTIDADES FINANCIERAS SIMILARES."
+    },
+    {
+        "code":  "6432",
+        "description":  "FONDOS DE CESANTIAS."
+    },
+    {
+        "code":  "6491",
+        "description":  "LEASING FINANCIERO (ARRENDAMIENTO FINANCIERO)."
+    },
+    {
+        "code":  "6492",
+        "description":  "ACTIVIDADES FINANCIERAS DE FONDOS DE EMPLEADOS Y OTRAS FORMAS ASOCIATIVAS DEL SECTOR SOLIDARIO."
+    },
+    {
+        "code":  "6493",
+        "description":  "ACTIVIDADES DE COMPRA DE CARTERA O FACTORING."
+    },
+    {
+        "code":  "6494",
+        "description":  "OTRAS ACTIVIDADES DE DISTRIBUCION DE FONDOS."
+    },
+    {
+        "code":  "6495",
+        "description":  "INSTITUCIONES ESPECIALES OFICIALES."
+    },
+    {
+        "code":  "6499",
+        "description":  "OTRAS ACTIVIDADES DE SERVICIO FINANCIERO, EXCEPTO LAS DE SEGUROS Y PENSIONES N.C.P."
+    },
+    {
+        "code":  "6511",
+        "description":  "SEGUROS GENERALES."
+    },
+    {
+        "code":  "6512",
+        "description":  "SEGUROS DE VIDA."
+    },
+    {
+        "code":  "6513",
+        "description":  "REASEGUROS."
+    },
+    {
+        "code":  "6514",
+        "description":  "CAPITALIZACION."
+    },
+    {
+        "code":  "6521",
+        "description":  "SERVICIOS DE SEGUROS SOCIALES DE SALUD."
+    },
+    {
+        "code":  "6522",
+        "description":  "SERVICIOS DE SEGUROS SOCIALES DE RIESGOS PROFESIONALES."
+    },
+    {
+        "code":  "6531",
+        "description":  "REGIMEN DE PRIMA MEDIA CON PRESTACION DEFINIDA (RPM)."
+    },
+    {
+        "code":  "6532",
+        "description":  "REGIMEN DE AHORRO INDIVIDUAL (RAI)."
+    },
+    {
+        "code":  "6611",
+        "description":  "ADMINISTRACION DE MERCADOS FINANCIEROS."
+    },
+    {
+        "code":  "6612",
+        "description":  "CORRETAJE DE VALORES Y DE CONTRATOS DE PRODUCTOS BASICOS."
+    },
+    {
+        "code":  "6613",
+        "description":  "OTRAS ACTIVIDADES RELACIONADAS CON EL MERCADO DE VALORES."
+    },
+    {
+        "code":  "6614",
+        "description":  "ACTIVIDADES DE LAS CASAS DE CAMBIO."
+    },
+    {
+        "code":  "6615",
+        "description":  "ACTIVIDADES DE LOS PROFESIONALES DE COMPRA Y VENTA DE DIVISAS."
+    },
+    {
+        "code":  "6619",
+        "description":  "OTRAS ACTIVIDADES AUXILIARES DE LAS ACTIVIDADES DE SERVICIOS FINANCIEROS N.C.P."
+    },
+    {
+        "code":  "6621",
+        "description":  "ACTIVIDADES DE AGENTES Y CORREDORES DE SEGUROS"
+    },
+    {
+        "code":  "6629",
+        "description":  "EVALUACION DE RIESGOS Y DAÑOS, Y OTRAS ACTIVIDADES DE SERVICIOS AUXILIARES"
+    },
+    {
+        "code":  "6630",
+        "description":  "ACTIVIDADES DE ADMINISTRACION DE FONDOS."
+    },
+    {
+        "code":  "6810",
+        "description":  "ACTIVIDADES INMOBILIARIAS REALIZADAS CON BIENES PROPIOS O ARRENDADOS."
+    },
+    {
+        "code":  "6820",
+        "description":  "ACTIVIDADES INMOBILIARIAS REALIZADAS A CAMBIO DE UNA RETRIBUCION O POR CONTRATA."
+    },
+    {
+        "code":  "6910",
+        "description":  "ACTIVIDADES JURIDICAS."
+    },
+    {
+        "code":  "6920",
+        "description":  "ACTIVIDADES DE CONTABILIDAD, TENEDURIA DE LIBROS, AUDITORIA FINANCIERA Y ASESORIA TRIBUTARIA."
+    },
+    {
+        "code":  "7010",
+        "description":  "ACTIVIDADES DE ADMINISTRACION EMPRESARIAL."
+    },
+    {
+        "code":  "7020",
+        "description":  "ACTIVIDADES DE CONSULTARIA DE GESTION."
+    },
+    {
+        "code":  "7110",
+        "description":  "ACTIVIDADES DE ARQUITECTURA E INGENIERIA Y OTRAS ACTIVIDADES CONEXAS DE CONSULTORIA TECNICA."
+    },
+    {
+        "code":  "7120",
+        "description":  "ENSAYOS Y ANALISIS TECNICOS."
+    },
+    {
+        "code":  "7210",
+        "description":  "INVESTIGACIONES Y DESARROLLO EXPERIMENTAL EN EL CAMPO DE LAS CIENCIAS NATURALES Y LA INGENIERIA."
+    },
+    {
+        "code":  "7220",
+        "description":  "INVESTIGACIONES Y DESARROLLO EXPERIMENTAL EN EL CAMPO DE LAS CIENCIAS SOCIALES Y LAS HUMANIDADES."
+    },
+    {
+        "code":  "7310",
+        "description":  "PUBLICIDAD."
+    },
+    {
+        "code":  "7320",
+        "description":  "ESTUDIOS DE MERCADO Y REALIZACION DE ENCUESTAS DE OPINION PUBLICA."
+    },
+    {
+        "code":  "7410",
+        "description":  "ACTIVIDADES ESPECIALIZADAS DE DISEÑO."
+    },
+    {
+        "code":  "7420",
+        "description":  "ACTIVIDADES DE FOTOGRAFIA."
+    },
+    {
+        "code":  "7490",
+        "description":  "OTRAS ACTIVIDADES PROFESIONALES, CIENTIFICAS Y TECNICAS N.C.P."
+    },
+    {
+        "code":  "7500",
+        "description":  "ACTIVIDADES VETERINARIAS."
+    },
+    {
+        "code":  "7710",
+        "description":  "ALQUILER Y ARRENDAMIENTO DE VEHICULOS AUTOMOTORES."
+    },
+    {
+        "code":  "7721",
+        "description":  "ALQUILER Y ARRENDAMIENTO DE EQUIPO RECREATIVO Y DEPORTIVO."
+    },
+    {
+        "code":  "7722",
+        "description":  "ALQUILER DE VIDEOS Y DISCOS."
+    },
+    {
+        "code":  "7729",
+        "description":  "ALQUILER Y ARRENDAMIENTO DE OTROS EFECTOS PERSONALES Y ENSERES DOMESTICOS N.C.P."
+    },
+    {
+        "code":  "7730",
+        "description":  "ALQUILER Y ARRENDAMIENTO DE OTROS TIPOS DE MAQUINARIA, EQUIPO Y BIENES TANGIBLES N.C.P."
+    },
+    {
+        "code":  "7740",
+        "description":  "ARRENDAMIENTO DE PROPIEDAD INTELECTUAL Y PRODUCTOS SIMILARES, EXCEPTO OBRAS PROTEGIDAS POR DERECHOS DE AUTOR."
+    },
+    {
+        "code":  "7810",
+        "description":  "ACTIVIDADES DE AGENCIAS DE EMPLEO."
+    },
+    {
+        "code":  "7820",
+        "description":  "ACTIVIDADES DE AGENCIAS DE EMPLEO TEMPORAL."
+    },
+    {
+        "code":  "7830",
+        "description":  "OTRAS ACTIVIDADES DE SUMINISTRO DE RECURSO HUMANO."
+    },
+    {
+        "code":  "7911",
+        "description":  "ACTIVIDADES DE LAS AGENCIAS DE VIAJE."
+    },
+    {
+        "code":  "7912",
+        "description":  "ACTIVIDADES DE OPERADORES TURISTICOS."
+    },
+    {
+        "code":  "7990",
+        "description":  "OTROS SERVICIOS DE RESERVA Y ACTIVIDADES RELACIONADAS."
+    },
+    {
+        "code":  "8010",
+        "description":  "ACTIVIDADES DE SEGURIDAD PRIVADA."
+    },
+    {
+        "code":  "8020",
+        "description":  "ACTIVIDADES DE SERVICIOS DE SISTEMAS DE SEGURIDAD."
+    },
+    {
+        "code":  "8030",
+        "description":  "ACTIVIDADES DE DETECTIVES E INVESTIGADORES PRIVADOS."
+    },
+    {
+        "code":  "8110",
+        "description":  "ACTIVIDADES COMBINADAS DE APOYO A INSTALACIONES."
+    },
+    {
+        "code":  "8121",
+        "description":  "LIMPIEZA GENERAL INTERIOR DE EDIFICIOS."
+    },
+    {
+        "code":  "8129",
+        "description":  "OTRAS ACTIVIDADES DE LIMPIEZA DE EDIFICIOS E INSTALACIONES INDUSTRIALES."
+    },
+    {
+        "code":  "8130",
+        "description":  "ACTIVIDADES DE PAISAJISMO Y SERVICIOS DE MANTENIMIENTO CONEXOS."
+    },
+    {
+        "code":  "8211",
+        "description":  "ACTIVIDADES COMBINADAS DE SERVICIOS ADMINISTRATIVOS DE OFICINA."
+    },
+    {
+        "code":  "8219",
+        "description":  "FOTOCOPIADO, PREPARACION DE DOCUMENTOS Y OTRAS ACTIVIDADES ESPECIALIZADAS DE APOYO A OFICINA."
+    },
+    {
+        "code":  "8220",
+        "description":  "ACTIVIDADES DE CENTROS DE LLAMADAS (CALL CENTER)."
+    },
+    {
+        "code":  "8230",
+        "description":  "ORGANIZACION DE CONVENCIONES Y EVENTOS COMERCIALES."
+    },
+    {
+        "code":  "8291",
+        "description":  "ACTIVIDADES DE AGENCIAS DE COBRANZA Y OFICINAS DE CALIFICACION CREDITICIA."
+    },
+    {
+        "code":  "8292",
+        "description":  "ACTIVIDADES DE ENVASE Y EMPAQUE."
+    },
+    {
+        "code":  "8299",
+        "description":  "OTRAS ACTIVIDADES DE SERVICIO DE APOYO A LAS EMPRESAS N.C.P."
+    },
+    {
+        "code":  "8411",
+        "description":  "ACTIVIDADES LEGISLATIVAS DE LA ADMINISTRACION PUBLICA."
+    },
+    {
+        "code":  "8412",
+        "description":  "ACTIVIDADES EJECUTIVAS DE LA ADMINISTRACION PUBLICA."
+    },
+    {
+        "code":  "8413",
+        "description":  "REGULACION DE LAS ACTIVIDADES DE ORGANISMOS QUE PRESTAN SERVICIOS DE SALUD, EDUCATIVOS, CULTURALES Y OTROS SERVICIOS SOCIALES, EXCEPTO SERVICIOS DE SEGURIDAD SOCIAL."
+    },
+    {
+        "code":  "8414",
+        "description":  "ACTIVIDADES REGULADORAS Y FACILITADORAS DE LA ACTIVIDAD ECONOMICA."
+    },
+    {
+        "code":  "8415",
+        "description":  "ACTIVIDADES DE LOS OTROS ORGANOS DE CONTROL."
+    },
+    {
+        "code":  "8421",
+        "description":  "RELACIONES EXTERIORES."
+    },
+    {
+        "code":  "8422",
+        "description":  "ACTIVIDADES DE DEFENSA."
+    },
+    {
+        "code":  "8423",
+        "description":  "ORDEN PUBLICO Y ACTIVIDADES DE SEGURIDAD."
+    },
+    {
+        "code":  "8424",
+        "description":  "ADMINISTRACION DE JUSTICIA."
+    },
+    {
+        "code":  "8430",
+        "description":  "ACTIVIDADES DE PLANES DE SEGURIDAD SOCIAL DE AFILIACION OBLIGATORIA."
+    },
+    {
+        "code":  "8511",
+        "description":  "EDUCACION DE LA PRIMERA INFANCIA."
+    },
+    {
+        "code":  "8512",
+        "description":  "EDUCACION PREESCOLAR."
+    },
+    {
+        "code":  "8513",
+        "description":  "EDUCACION BASICA PRIMARIA."
+    },
+    {
+        "code":  "8521",
+        "description":  "EDUCACION BASICA SECUNDARIA."
+    },
+    {
+        "code":  "8522",
+        "description":  "EDUCACION MEDIA ACADEMICA."
+    },
+    {
+        "code":  "8523",
+        "description":  "EDUCACION MEDIA TECNICA Y DE FORMACION LABORAL."
+    },
+    {
+        "code":  "8530",
+        "description":  "ESTABLECIMIENTOS QUE COMBINAN DIFERENTES NIVELES DE EDUCACION."
+    },
+    {
+        "code":  "8541",
+        "description":  "EDUCACION TECNICA PROFESIONAL."
+    },
+    {
+        "code":  "8542",
+        "description":  "EDUCACION TECNOLOGICA."
+    },
+    {
+        "code":  "8543",
+        "description":  "EDUCACION DE INSTITUCIONES UNIVERSITARIAS O DE ESCUELAS TECNOLOGICAS."
+    },
+    {
+        "code":  "8544",
+        "description":  "EDUCACION DE UNIVERSIDADES."
+    },
+    {
+        "code":  "8551",
+        "description":  "FORMACION ACADEMICA NO FORMAL."
+    },
+    {
+        "code":  "8552",
+        "description":  "ENSEÑANZA DEPORTIVA Y RECREATIVA."
+    },
+    {
+        "code":  "8553",
+        "description":  "ENSEÑANZA CULTURAL."
+    },
+    {
+        "code":  "8559",
+        "description":  "OTROS TIPOS DE EDUCACION N.C.P."
+    },
+    {
+        "code":  "8560",
+        "description":  "ACTIVIDADES DE APOYO A LA EDUCACION."
+    },
+    {
+        "code":  "8610",
+        "description":  "ACTIVIDADES DE HOSPITALES Y CLINICAS, CON INTERNACION."
+    },
+    {
+        "code":  "8621",
+        "description":  "ACTIVIDADES DE LA PRACTICA MEDICA, SIN INTERNACION."
+    },
+    {
+        "code":  "8622",
+        "description":  "ACTIVIDADES DE LA PRACTICA ODONTOLOGICA."
+    },
+    {
+        "code":  "8691",
+        "description":  "ACTIVIDADES DE APOYO DIAGNOSTICO."
+    },
+    {
+        "code":  "8692",
+        "description":  "ACTIVIDADES DE APOYO TERAPEUTICO."
+    },
+    {
+        "code":  "8699",
+        "description":  "OTRAS ACTIVIDADES DE ATENCION DE LA SALUD HUMANA."
+    },
+    {
+        "code":  "8710",
+        "description":  "ACTIVIDADES DE ATENCION RESIDENCIAL MEDICALIZADA DE TIPO GENERAL."
+    },
+    {
+        "code":  "8720",
+        "description":  "ACTIVIDADES DE ATENCION RESIDENCIAL, PARA EL CUIDADO DE PACIENTES CON RETARDO MENTAL, ENFERMEDAD MENTAL Y CONSUMO DE SUSTANCIAS PSICOACTIVAS."
+    },
+    {
+        "code":  "8730",
+        "description":  "ACTIVIDADES DE ATENCION EN INSTITUCIONES PARA EL CUIDADO DE PERSONAS MAYORES Y/O DISCAPACITADAS."
+    },
+    {
+        "code":  "8790",
+        "description":  "OTRAS ACTIVIDADES DE ATENCION EN INSTITUCIONES CON ALOJAMIENTO"
+    },
+    {
+        "code":  "8810",
+        "description":  "ACTIVIDADES DE ASISTENCIA SOCIAL SIN ALOJAMIENTO PARA PERSONAS MAYORES Y DISCAPACITADAS."
+    },
+    {
+        "code":  "8890",
+        "description":  "OTRAS ACTIVIDADES DE ASISTENCIA SOCIAL SIN ALOJAMIENTO."
+    },
+    {
+        "code":  "9001",
+        "description":  "CREACION LITERARIA."
+    },
+    {
+        "code":  "9002",
+        "description":  "CREACION MUSICAL."
+    },
+    {
+        "code":  "9003",
+        "description":  "CREACION TEATRAL."
+    },
+    {
+        "code":  "9004",
+        "description":  "CREACION AUDIOVISUAL."
+    },
+    {
+        "code":  "9005",
+        "description":  "ARTES PLASTICAS Y VISUALES."
+    },
+    {
+        "code":  "9006",
+        "description":  "ACTIVIDADES TEATRALES."
+    },
+    {
+        "code":  "9007",
+        "description":  "ACTIVIDADES DE ESPECTACULOS MUSICALES EN VIVO."
+    },
+    {
+        "code":  "9008",
+        "description":  "OTRAS ACTIVIDADES DE ESPECTACULOS EN VIVO."
+    },
+    {
+        "code":  "9101",
+        "description":  "ACTIVIDADES DE BIBLIOTECAS Y ARCHIVOS."
+    },
+    {
+        "code":  "9102",
+        "description":  "ACTIVIDADES Y FUNCIONAMIENTO DE MUSEOS, CONSERVACION DE EDIFICIOS Y SITIOS HISTORICOS."
+    },
+    {
+        "code":  "9103",
+        "description":  "ACTIVIDADES DE JARDINES BOTANICOS, ZOOLOGICOS Y RESERVAS NATURALES."
+    },
+    {
+        "code":  "9200",
+        "description":  "ACTIVIDADES DE JUEGOS DE AZAR Y APUESTAS."
+    },
+    {
+        "code":  "9311",
+        "description":  "GESTION DE INSTALACIONES DEPORTIVAS."
+    },
+    {
+        "code":  "9312",
+        "description":  "ACTIVIDADES DE CLUBES DEPORTIVOS."
+    },
+    {
+        "code":  "9319",
+        "description":  "OTRAS ACTIVIDADES DEPORTIVAS."
+    },
+    {
+        "code":  "9321",
+        "description":  "ACTIVIDADES DE PARQUES DE ATRACCIONES Y PARQUES TEMATICOS."
+    },
+    {
+        "code":  "9329",
+        "description":  "OTRAS ACTIVIDADES RECREATIVAS Y DE ESPARCIMIENTO N.C.P."
+    },
+    {
+        "code":  "9411",
+        "description":  "ACTIVIDADES DE ASOCIACIONES EMPRESARIALES Y DE EMPLEADORES"
+    },
+    {
+        "code":  "9412",
+        "description":  "ACTIVIDADES DE ASOCIACIONES PROFESIONALES"
+    },
+    {
+        "code":  "0000",
+        "description":  "GENERAL"
+    },
+    {
+        "code":  "0010",
+        "description":  "ASALARIADOS"
+    },
+    {
+        "code":  "0081",
+        "description":  "PERSONAS NATURALES SIN ACTIVIDAD ECONOMICA"
+    },
+    {
+        "code":  "0082",
+        "description":  "PERSONAS NATURALES SUBSIDIADAS POR TERCEROS"
+    },
+    {
+        "code":  "0090",
+        "description":  "RENTISTAS DE CAPITAL, SOLO PARA PERSONAS NATURALES."
+    },
+    {
+        "code":  "0020",
+        "description":  "PENSIONADOS"
+    }
+]
