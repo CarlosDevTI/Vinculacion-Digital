@@ -1,12 +1,42 @@
 import logging
 from datetime import datetime
 from urllib.parse import urljoin
+import re
+import unicodedata
 
 import requests
 from django.conf import settings
 from django.core.cache import cache
 
 logger = logging.getLogger(__name__)
+
+DEFAULT_SUCURSAL_MAP = {
+    "ACACIAS": "103",
+    "BARRANCADEUPIA": "109",
+    "CABUYARO": "111",
+    "CASTILLALANUEVA": "216",
+    "CATAMA": "108",
+    "CUBARRAL": "203",
+    "CUMARAL": "206",
+    "ELCASTILLO": "213",
+    "GRANADA": "106",
+    "GUAYABETAL": "107",
+    "LEJANIAS": "205",
+    "MESETAS": "211",
+    "MONTECARLO": "105",
+    "POPULAR": "102",
+    "PORFIA": "104",
+    "PRINCIPAL": "101",
+    "PUERTOGAITAN": "110",
+    "PUERTOLLERAS": "214",
+    "PUERTOLOPEZ": "210",
+    "PUERTORICO": "204",
+    "TAURAMENA": "208",
+    "URIBE": "212",
+    "VILLANUEVA": "207",
+    "VISTAHERMOSA": "112",
+    "YOPAL": "209",
+}
 
 
 class VinculacionAgilError(Exception):
@@ -43,9 +73,11 @@ class VinculacionAgilService:
         self.tipo_cuenta_default = str(getattr(settings, "LINIX_DEFAULT_TIPO_CUENTA", "A"))
         self.valor_factor_default = str(getattr(settings, "LINIX_DEFAULT_VALOR_FACTOR", "1"))
         self.nit_default = str(getattr(settings, "LINIX_NIT_DEFAULT", "") or "").strip()
+        self.sucursal_default = str(getattr(settings, "LINIX_DEFAULT_SUCURSAL", "101") or "101").strip()
         self.catalog_defaults = getattr(settings, "LINIX_CATALOG_DEFAULTS", {})
         self.linix_dry_run = bool(getattr(settings, "LINIX_DRY_RUN", False) and settings.DEBUG)
         self.request_verify = self.ca_bundle if self.ca_bundle else self.verify_ssl
+        self.sucursal_map = DEFAULT_SUCURSAL_MAP
 
     def _build_url(self, path):
         return urljoin(self.base_url.rstrip("/") + "/", str(path).lstrip("/"))
@@ -74,6 +106,19 @@ class VinculacionAgilService:
         country = self.country_code_default
         return dept_code, country
 
+    @staticmethod
+    def _norm_text(value):
+        clean = unicodedata.normalize("NFKD", str(value or ""))
+        clean = clean.encode("ascii", "ignore").decode("ascii").upper()
+        return re.sub(r"[^A-Z0-9]", "", clean)
+
+    def _resolve_sucursal_code(self, sucursal_raw):
+        raw = str(sucursal_raw or "").strip()
+        if raw.isdigit():
+            return raw
+        normalized = self._norm_text(raw)
+        return self.sucursal_map.get(normalized, self.sucursal_default)
+
     def build_trama(self, data):
         """
         Mapea DTO reducido -> Trama completa para core LINIX.
@@ -82,12 +127,16 @@ class VinculacionAgilService:
         dept_code, country_code = self._derive_geo_codes(data["ciudad"])
         identificacion = str(data["identificacion"]).strip()
         nit_asociado = self.nit_default or identificacion
+        sucursal_code = self._resolve_sucursal_code(data.get("sucursal"))
 
         trama = {
             # Algunos despliegues de LINIX requieren este campo fuera del bloque A_*
             "nit": nit_asociado,
             "Nit": nit_asociado,
             "NIT": nit_asociado,
+            # Alias de compatibilidad para validadores por nombre de campo
+            "sucursal": sucursal_code,
+            "Sucursal": sucursal_code,
             "A_ACTIVO": "Y",
             "A_ASOCON": "1",
             "A_AUTORETENEDOR": self.autoretenedor_default,
@@ -117,7 +166,7 @@ class VinculacionAgilService:
             "A_EMAIL": str(data["email"]).strip().lower(),
             "A_NUM_CELULAR": str(data["celular"]).strip(),
             "A_TELEFONO": str(data.get("telefono") or "").strip(),
-            "A_SUCURSAL": str(data["sucursal"]),
+            "A_SUCURSAL": sucursal_code,
             "F_ANTIGUEDAD": fecha_afiliacion,
             "F_PRIMERA_AFILIA": fecha_afiliacion,
             "F_ULTIMA_AFILIA": fecha_afiliacion,
