@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from datetime import datetime, date
 from urllib.parse import urljoin
 import re
 import unicodedata
@@ -96,9 +96,35 @@ class VinculacionAgilService:
     def _string_date(value):
         if isinstance(value, datetime):
             return value.date().isoformat()
+        if isinstance(value, date):
+            return value.isoformat()
         if hasattr(value, "isoformat"):
             return value.isoformat()
         return str(value)
+
+    @staticmethod
+    def _mmddyyyy(value):
+        """
+        Convierte fecha a formato MM/DD/YYYY requerido por algunos endpoints LINIX.
+        """
+        if isinstance(value, datetime):
+            return value.strftime("%m/%d/%Y")
+        if isinstance(value, date):
+            return value.strftime("%m/%d/%Y")
+
+        raw = str(value or "").strip()
+        if not raw:
+            return raw
+
+        try:
+            return datetime.strptime(raw[:10], "%Y-%m-%d").strftime("%m/%d/%Y")
+        except ValueError:
+            pass
+
+        try:
+            return datetime.strptime(raw[:10], "%m/%d/%Y").strftime("%m/%d/%Y")
+        except ValueError:
+            return raw
 
     def _derive_geo_codes(self, ciudad_code):
         city = str(ciudad_code or "").strip()
@@ -123,7 +149,7 @@ class VinculacionAgilService:
         """
         Mapea DTO reducido -> Trama completa para core LINIX.
         """
-        fecha_afiliacion = self._string_date(data["fechaAfiliacion"])
+        fecha_afiliacion = self._mmddyyyy(data["fechaAfiliacion"])
         dept_code, country_code = self._derive_geo_codes(data["ciudad"])
         identificacion = str(data["identificacion"]).strip()
         nit_asociado = self.nit_default or identificacion
@@ -137,6 +163,8 @@ class VinculacionAgilService:
             # Alias de compatibilidad para validadores por nombre de campo
             "sucursal": sucursal_code,
             "Sucursal": sucursal_code,
+            "fechaAfiliacion": fecha_afiliacion,
+            "FechaAfiliacion": fecha_afiliacion,
             "A_ACTIVO": "Y",
             "A_ASOCON": "1",
             "A_AUTORETENEDOR": self.autoretenedor_default,
