@@ -3,6 +3,7 @@ from datetime import datetime, date
 from urllib.parse import urljoin
 import re
 import unicodedata
+from decimal import Decimal, InvalidOperation
 
 import requests
 from django.conf import settings
@@ -12,6 +13,7 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_SUCURSAL_MAP = {
     "ACACIAS": "103",
+    "BARRANCA": "109",
     "BARRANCADEUPIA": "109",
     "CABUYARO": "111",
     "CASTILLALANUEVA": "216",
@@ -133,6 +135,22 @@ class VinculacionAgilService:
         return dept_code, country
 
     @staticmethod
+    def _decimal_to_plain(value):
+        """
+        Convierte salarios/valores numericos a string sin separadores de miles.
+        """
+        if value is None:
+            return ""
+
+        try:
+            parsed = Decimal(str(value))
+            if parsed == parsed.to_integral_value():
+                return str(int(parsed))
+            return format(parsed, "f")
+        except (InvalidOperation, ValueError, TypeError):
+            return re.sub(r"\D", "", str(value or ""))
+
+    @staticmethod
     def _norm_text(value):
         clean = unicodedata.normalize("NFKD", str(value or ""))
         clean = clean.encode("ascii", "ignore").decode("ascii").upper()
@@ -145,103 +163,164 @@ class VinculacionAgilService:
         normalized = self._norm_text(raw)
         return self.sucursal_map.get(normalized, self.sucursal_default)
 
-    def build_trama(self, data):
+    def build_trama(self, data, preregistro=None):
         """
         Mapea DTO reducido -> Trama completa para core LINIX.
         """
-        fecha_afiliacion = self._mmddyyyy(data["fechaAfiliacion"])
-        dept_code, country_code = self._derive_geo_codes(data["ciudad"])
-        identificacion = str(data["identificacion"]).strip()
+        identificacion = str(
+            data.get("identificacion")
+            or getattr(preregistro, "numero_cedula", "")
+            or ""
+        ).strip()
+        fecha_afiliacion_origen = data.get("fechaAfiliacion") or datetime.now().date()
+        fecha_afiliacion = self._mmddyyyy(fecha_afiliacion_origen)
+        ciudad_code = str(data.get("ciudad") or "").strip() or str(
+            getattr(settings, "LINIX_DEFAULT_CITY_CODE", "11001")
+        )
+        dept_code, country_code = self._derive_geo_codes(ciudad_code)
         nit_asociado = self.nit_default or identificacion
-        sucursal_code = self._resolve_sucursal_code(data.get("sucursal"))
+        sucursal_code = self._resolve_sucursal_code(
+            data.get("sucursal") or getattr(preregistro, "agencia", None)
+        )
+        fecha_expedicion = self._mmddyyyy(
+            getattr(preregistro, "fecha_expedicion", None) or fecha_afiliacion_origen
+        )
+        celular = str(data.get("celular") or "").strip()
+        telefono = str(data.get("telefono") or celular).strip()
+        salario = self._decimal_to_plain(data.get("salario"))
+        poblacion_vulnerable = str(data.get("poblacionVulnerable") or "N")
+        publico_expuesto = str(data.get("publicamenteExpuesto") or "N")
+        operaciones_monext = str(data.get("operacionesMonedaExtranjera") or "N")
+        declara_renta = str(data.get("declaraRenta") or "N")
+        administra_recursos = str(data.get("administraRecursosPublicos") or "N")
+        vinculado_recursos = str(data.get("vinculadoRecursosPublicos") or "N")
+
+        defaults = self.catalog_defaults
+        tipo_contrato = str(defaults.get("A_TIPO_CONTRATO", "TI"))
+        jornada_laboral = str(defaults.get("A_JORNADA_LABORAL", "1"))
+        codigo_banco = str(defaults.get("A_CODIGO_BANCO", "01"))
+        factor_rh = str(defaults.get("A_FACTOR_RH", "O+"))
+        indicativo = str(defaults.get("A_INDICATIVO", "057"))
+        formalidad_negocio = str(defaults.get("A_FORMALIDAD_NEGOCIO", "FOR"))
+        autoriza_centrales = str(defaults.get("A_AUTORIZA_CENTRALES", "Y"))
+        autoriza_notificacion = str(defaults.get("A_AUTORIZA_NOTIFICACION", "Y"))
+        nombre_empresa = str(defaults.get("A_NOMBRE_EMPRESA", "INDEPENDIENTE"))
+        codigo_empleado = str(defaults.get("A_CODIGO_EMPLEADO", "0"))
+
+        cliente = {
+            "identificacion": identificacion,
+            "tipoDocumento": str(data.get("tipoDocumento") or ""),
+            "primerNombre": str(data.get("primerNombre") or "").strip().upper(),
+            "segundoNombre": str(data.get("segundoNombre") or "").strip().upper(),
+            "primerApellido": str(data.get("primerApellido") or "").strip().upper(),
+            "segundoApellido": str(data.get("segundoApellido") or "").strip().upper(),
+            "fechaNacimiento": self._mmddyyyy(data.get("fechaNacimiento")),
+            "genero": str(data.get("genero") or ""),
+            "estadoCivil": str(data.get("estadoCivil") or ""),
+            "email": str(data.get("email") or "").strip().lower(),
+            "numeroCelular": celular,
+            "telefono": telefono,
+            "salario": salario,
+            "estrato": str(data.get("estrato") or ""),
+            "nivelEstudio": str(data.get("nivelEstudio") or ""),
+            "actividadEconomica": str(data.get("actividadEconomica") or ""),
+            "tipoVivienda": str(data.get("tipoVivienda") or ""),
+            "factorRH": factor_rh,
+            "fechaExpedicion": fecha_expedicion,
+            "ciudadExpedicion": ciudad_code,
+            "departamentoExpedicion": dept_code,
+            "paisExpedicion": country_code,
+            "tipoCuenta": self.tipo_cuenta_default,
+            "numeroCuenta": str(defaults.get("A_NUMERO_CUENTA", "")),
+            "codigoBanco": codigo_banco,
+            "tipoContrato": tipo_contrato,
+            "jornadaLaboral": jornada_laboral,
+            "salarioIntegral": "N",
+            "autorizaCentrales": autoriza_centrales,
+            "autorizaNotificacion": autoriza_notificacion,
+            "actividadCIIU": str(data.get("actividadCIIU") or ""),
+            "actividadCIIUSecundaria": str(data.get("actividadCIIUSecundaria") or "000"),
+            "ocupacion": str(data.get("ocupacion") or ""),
+            "poblacionVulnerable": poblacion_vulnerable,
+            "personasCargo": str(data.get("personasCargo") if data.get("personasCargo") is not None else "0"),
+            "publicamenteExpuesto": publico_expuesto,
+            "mujerCabeza": str(defaults.get("A_MUJER_CABEZA", "N")),
+            "responsableHogar": str(defaults.get("A_RESPONSABLE_HOGAR", "N")),
+            "operacionesMonedaExtranjera": operaciones_monext,
+            "declaraRenta": declara_renta,
+            "administraRecursos": administra_recursos,
+            "vinculadoRecursosPublicos": vinculado_recursos,
+            "fechaIngreso": self._mmddyyyy(defaults.get("A_FECHA_INGRESO", fecha_afiliacion)),
+            "fechaVencimientoContrato": str(defaults.get("A_FECHA_VENCIMIENTO_CONTRATO", "")),
+            "ciudadNacimiento": str(defaults.get("A_CIUDAD_NACIMIENTO", ciudad_code)),
+        }
+
+        contactos = [{
+            "tipoDireccion": "C",
+            "direccion": str(data.get("direccion") or "").strip().upper(),
+            "telefono": telefono,
+            "movil": celular,
+            "email": str(data.get("email") or "").strip().lower(),
+            "ciudad": ciudad_code,
+            "barrio": str(data.get("barrio") or "").strip().upper(),
+            "extension": str(defaults.get("A_EXTENSION", "")),
+            "indicativo": indicativo,
+            "direccionCorrespondencia": "Y",
+        }]
+
+        laboral = {
+            "codigoEmpleado": codigo_empleado,
+            "nombreEmpresa": nombre_empresa,
+            "tipoContrato": tipo_contrato,
+            "fechaIngreso": self._mmddyyyy(defaults.get("A_FECHA_INGRESO", fecha_afiliacion)),
+            "fechaVencimiento": str(defaults.get("A_FECHA_VENCIMIENTO", "")),
+            "salarioIntegral": "N",
+            "jornadaLaboral": jornada_laboral,
+            "ciudadEmpresa": str(defaults.get("A_CIUDAD_EMPRESA", ciudad_code)),
+            "departamentoEmpresa": str(defaults.get("A_DEPARTAMENTO_EMPRESA", dept_code)),
+            "paisEmpresa": str(defaults.get("A_PAIS_EMPRESA", country_code)),
+            "telefonoEmpresa": str(defaults.get("A_TELEFONO_EMPRESA", telefono)),
+            "direccionEmpresa": str(defaults.get("A_DIRECCION_EMPRESA", str(data.get("direccion") or "").strip().upper())),
+            "faxEmpresa": str(defaults.get("A_FAX_EMPRESA", "")),
+            "formalidadNegocio": formalidad_negocio,
+        }
 
         trama = {
-            # Algunos despliegues de LINIX requieren este campo fuera del bloque A_*
             "nit": nit_asociado,
-            "Nit": nit_asociado,
-            "NIT": nit_asociado,
-            # Alias de compatibilidad para validadores por nombre de campo
             "sucursal": sucursal_code,
-            "Sucursal": sucursal_code,
             "fechaAfiliacion": fecha_afiliacion,
-            "FechaAfiliacion": fecha_afiliacion,
-            "A_ACTIVO": "Y",
-            "A_ASOCON": "1",
-            "A_AUTORETENEDOR": self.autoretenedor_default,
-            "A_EMPRESA": "0",
-            "A_ESTADO_CLIENTE": "A",
-            "A_FUNCIONALIDAD": "6",
-            "A_NATURALEZA": "N",
-            "A_NOMINA": "999",
-            "A_TIPASO": "5",
-            "A_TIPO_CON": self.tipo_con_default,
-            "A_TIPO_CUENTA": self.tipo_cuenta_default,
-            "A_TIPO_DOC": str(data["tipoDocumento"]),
-            "A_CODIGO_CLIENTE": identificacion,
-            "F_NACIMIENTO": self._string_date(data["fechaNacimiento"]),
-            "A_PRIMER_NOMBRE": str(data["primerNombre"]).strip().upper(),
-            "A_SEGUNDO_NOMBRE": str(data.get("segundoNombre") or "").strip().upper(),
-            "A_PRIMER_APELLIDO": str(data["primerApellido"]).strip().upper(),
-            "A_SEGUNDO_APELLIDO": str(data.get("segundoApellido") or "").strip().upper(),
-            "A_NOMBRE": self._full_name(
-                data["primerApellido"],
-                data.get("segundoApellido"),
-                data["primerNombre"],
-                data.get("segundoNombre"),
-            ),
-            "A_GENERO": str(data["genero"]),
-            "A_ESTADO_CIVIL": str(data["estadoCivil"]),
-            "A_EMAIL": str(data["email"]).strip().lower(),
-            "A_NUM_CELULAR": str(data["celular"]).strip(),
-            "A_TELEFONO": str(data.get("telefono") or "").strip(),
-            "A_SUCURSAL": sucursal_code,
-            "F_ANTIGUEDAD": fecha_afiliacion,
-            "F_PRIMERA_AFILIA": fecha_afiliacion,
-            "F_ULTIMA_AFILIA": fecha_afiliacion,
-            "F_APROBACION": fecha_afiliacion,
-            "A_UBICACION_UNO": str(self.catalog_defaults.get("A_UBICACION_UNO", "1")),
-            "A_UBICACION_DOS": str(self.catalog_defaults.get("A_UBICACION_DOS", "1")),
-            "A_SECCION": str(self.catalog_defaults.get("A_SECCION", "1")),
-            "A_CENCOS": str(self.catalog_defaults.get("A_CENCOS", "1")),
-            "A_CARGO": str(self.catalog_defaults.get("A_CARGO", "1")),
-            "A_DEPENDENCIA": str(self.catalog_defaults.get("A_DEPENDENCIA", "1")),
-            "R_Contacto": {
-                "A_TIPO_DIRECCION": "C",
-                "A_DIRECCION_CONTACTO": str(data["direccion"]).strip().upper(),
-                "A_BARRIO": str(data["barrio"]).strip().upper(),
-                "A_CIUDAD_DIR": str(data["ciudad"]).strip(),
-                "A_CODIGO_DEPART": dept_code,
-                "A_CODIGO_PAIS": country_code,
-            },
-            "R_Estatutarias": {
-                "V_VALOR_FACTOR": self.valor_factor_default,
-            },
-            "R_Financiera": {
-                "A_OPERACIONES_MONEXT": str(data["operacionesMonedaExtranjera"]),
-                "A_DECLARA_RENTA": str(data["declaraRenta"]),
-                "A_ADMINTRA_RECURSOS": str(data["administraRecursosPublicos"]),
-                "I_VINCULADO_RECPU": str(data["vinculadoRecursosPublicos"]),
-            },
-            "R_Socioeconomica": {
-                "A_ESTRATO": int(data["estrato"]),
-                "A_TIPO_VIVIENDA": str(data["tipoVivienda"]),
-                "A_NIVEL_ESTUDIO": str(data["nivelEstudio"]),
-                "A_ACTIVIDAD_ECONOMICA": str(data["actividadEconomica"]),
-                "A_OCUPACION": str(data["ocupacion"]),
-                "A_ACTIVIDAD_CIIU": str(data["actividadCIIU"]),
-                "A_ACTIVIDAD_CIIU_SECU": str(data["actividadCIIUSecundaria"]),
-                "A_POBVULNERABLE": str(data["poblacionVulnerable"]),
-                "A_PUBEXP": str(data["publicamenteExpuesto"]),
-                "A_NUM_PERCARGO": int(data["personasCargo"]),
-                "V_SUELDO_ASOC": str(data["salario"]),
-            },
-            "R_Laboral": {
-                "A_ESTADO_LABORAL": str(self.catalog_defaults.get("A_ESTADO_LABORAL", "A")),
-                "A_TIPO_CONTRATO": str(self.catalog_defaults.get("A_TIPO_CONTRATO", "01")),
-            },
-            "R_Activos": [],
-            "R_Pasivos": [],
+            "cliente": cliente,
+            "contactos": contactos,
+            "laboral": laboral,
+            "activos": [],
+            "pasivos": [],
         }
+
+        required_fields = {
+            "nit": trama.get("nit"),
+            "sucursal": trama.get("sucursal"),
+            "fechaAfiliacion": trama.get("fechaAfiliacion"),
+            "cliente.identificacion": cliente.get("identificacion"),
+            "cliente.tipoDocumento": cliente.get("tipoDocumento"),
+            "cliente.primerNombre": cliente.get("primerNombre"),
+            "cliente.primerApellido": cliente.get("primerApellido"),
+            "cliente.fechaNacimiento": cliente.get("fechaNacimiento"),
+            "cliente.genero": cliente.get("genero"),
+            "cliente.estadoCivil": cliente.get("estadoCivil"),
+            "cliente.email": cliente.get("email"),
+            "cliente.numeroCelular": cliente.get("numeroCelular"),
+            "contactos[0].direccion": contactos[0].get("direccion"),
+            "contactos[0].ciudad": contactos[0].get("ciudad"),
+            "contactos[0].barrio": contactos[0].get("barrio"),
+        }
+        missing = [
+            key for key, value in required_fields.items()
+            if value is None or (isinstance(value, str) and not value.strip())
+        ]
+        if missing:
+            raise VinculacionAgilError(
+                "Campos requeridos faltantes para LINIX: " + ", ".join(missing)
+            )
 
         return trama
 
@@ -317,7 +396,7 @@ class VinculacionAgilService:
                 "response_data": {
                     "result": 0,
                     "message": "Vinculacion simulada en modo local (LINIX_DRY_RUN).",
-                    "radicado": f"DRY-{payload.get('A_CODIGO_CLIENTE', 'N/A')}",
+                    "radicado": f"DRY-{payload.get('cliente', {}).get('identificacion', 'N/A')}",
                 },
             }
 

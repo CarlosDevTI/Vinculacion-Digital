@@ -819,8 +819,9 @@ class VinculacionAgilView(APIView):
 
         service = VinculacionAgilService()
 
+        trama = None
         try:
-            trama = service.build_trama(payload)
+            trama = service.build_trama(payload, preregistro=preregistro)
             linix_result = service.send_linix_vinculacion(trama)
         except VinculacionAgilError as exc:
             message = str(exc)
@@ -832,7 +833,10 @@ class VinculacionAgilView(APIView):
                 preregistro=preregistro,
                 accion="VINCULACION_AGIL",
                 exitoso=False,
-                request_data={"payload": payload_safe},
+                request_data={
+                    "payload": payload_safe,
+                    "trama_preview": _json_safe(trama) if trama else {}
+                },
                 response_data={},
                 error_message=message,
             )

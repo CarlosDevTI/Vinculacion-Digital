@@ -342,8 +342,8 @@ class VinculacionAgilSerializer(serializers.Serializer):
     administraRecursosPublicos = serializers.CharField(max_length=2)
     vinculadoRecursosPublicos = serializers.CharField(max_length=2)
 
-    sucursal = serializers.CharField(max_length=10)
-    fechaAfiliacion = serializers.DateField(input_formats=['%Y-%m-%d'])
+    sucursal = serializers.CharField(max_length=20, required=False, allow_blank=True)
+    fechaAfiliacion = serializers.DateField(input_formats=['%Y-%m-%d'], required=False)
 
     def validate_identificacion(self, value):
         cleaned = str(value).strip()
