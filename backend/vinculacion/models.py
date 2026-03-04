@@ -338,12 +338,14 @@ class LogIntegracion(models.Model):
     ACCION_REGISTRO_DECRIM = 'REGISTRO_DECRIM'
     ACCION_VERIFICACION_ORACLE = 'VERIFICACION_ORACLE'
     ACCION_WEBHOOK_N8N = 'WEBHOOK_N8N'
+    ACCION_NOTIFICACION_AGENCIA = 'NOTIFICACION_AGENCIA'
     
     ACCION_CHOICES = [
         (ACCION_CONSULTA_BIOMETRIA, 'Consulta Estado Biometría'),
         (ACCION_REGISTRO_DECRIM, 'Registro en DECRIM'),
         (ACCION_VERIFICACION_ORACLE, 'Verificación en Oracle'),
         (ACCION_WEBHOOK_N8N, 'Webhook a n8n'),
+        (ACCION_NOTIFICACION_AGENCIA, 'Notificación de agencia por correo'),
     ]
     
     preregistro = models.ForeignKey(

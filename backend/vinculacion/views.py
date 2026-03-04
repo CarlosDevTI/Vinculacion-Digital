@@ -19,6 +19,7 @@ from rest_framework.permissions import AllowAny
 from django.conf import settings
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from django.core.mail import EmailMessage
 import base64
 import hashlib
 import hmac
@@ -97,6 +98,121 @@ def _get_client_ip(request):
     if forwarded_for:
         return forwarded_for.split(',')[0].strip()
     return request.META.get('REMOTE_ADDR')
+
+
+def _normalize_email_list(raw_value):
+    if not raw_value:
+        return []
+    if isinstance(raw_value, str):
+        candidates = [raw_value]
+    else:
+        candidates = list(raw_value)
+    return [str(item).strip() for item in candidates if str(item).strip()]
+
+
+def _resolver_destinatarios_agencia(agencia):
+    agencia_key = str(agencia or '').strip().upper()
+    mapa = getattr(settings, 'AGENCIA_NOTIFICACION_MAP', {}) or {}
+    default_to = _normalize_email_list(
+        getattr(settings, 'AGENCIA_NOTIFICACION_DEFAULT_EMAILS', [])
+    )
+    if not default_to:
+        default_to = ['congente.tecnologia@congente.coop']
+
+    force_agencia = str(
+        getattr(settings, 'AGENCIA_NOTIFICACION_FORCE_AGENCIA', '') or ''
+    ).strip().upper()
+    force_to = _normalize_email_list(
+        getattr(settings, 'AGENCIA_NOTIFICACION_FORCE_TO', [])
+    )
+    force_cc = _normalize_email_list(
+        getattr(settings, 'AGENCIA_NOTIFICACION_FORCE_CC', [])
+    )
+
+    if force_agencia:
+        agencia_key = force_agencia
+
+    if force_agencia or force_to or force_cc:
+        cfg_forced = mapa.get(agencia_key, {}) if isinstance(mapa, dict) else {}
+        to_emails = force_to or _normalize_email_list(cfg_forced.get('to')) or default_to
+        # Si se fuerza TO (prueba controlada), por defecto no se arrastra CC de la agencia
+        cc_emails = force_cc if (force_cc or force_to) else _normalize_email_list(cfg_forced.get('cc'))
+        return agencia_key, to_emails, cc_emails
+
+    cfg = mapa.get(agencia_key, {})
+    to_emails = _normalize_email_list(cfg.get('to')) if isinstance(cfg, dict) else []
+    cc_emails = _normalize_email_list(cfg.get('cc')) if isinstance(cfg, dict) else []
+
+    if not to_emails:
+        to_emails = default_to
+    return agencia_key, to_emails, cc_emails
+
+
+def _enviar_notificacion_agencia_email(preregistro, origen='manual'):
+    agencia_key, to_emails, cc_emails = _resolver_destinatarios_agencia(preregistro.agencia)
+    from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', '') or 'congente.tecnologia@congente.coop'
+    subject = (
+        f"[Vinculacion Digital] Nuevo asociado - {preregistro.numero_cedula} - "
+        f"{agencia_key or 'SIN_AGENCIA'}"
+    )
+    body = (
+        "Se registro un nuevo asociado en Vinculacion Digital.\n\n"
+        f"Pre-registro ID: {preregistro.id}\n"
+        f"Cedula: {preregistro.numero_cedula}\n"
+        f"Nombre: {preregistro.nombres_completos}\n"
+        f"Agencia: {agencia_key or 'NO DEFINIDA'}\n"
+        f"ID tercero LINIX: {preregistro.id_tercero_linix or 'N/A'}\n"
+        f"Fecha completado: {preregistro.fecha_completado.isoformat() if preregistro.fecha_completado else 'N/A'}\n"
+        f"Origen: {origen}\n"
+    )
+
+    request_payload = {
+        'agencia': agencia_key,
+        'to': to_emails,
+        'cc': cc_emails,
+        'from_email': from_email,
+        'subject': subject,
+        'origen': origen,
+    }
+
+    try:
+        email = EmailMessage(
+            subject=subject,
+            body=body,
+            from_email=from_email,
+            to=to_emails,
+            cc=cc_emails,
+        )
+        sent_count = email.send(fail_silently=False)
+        LogIntegracion.objects.create(
+            preregistro=preregistro,
+            accion=LogIntegracion.ACCION_NOTIFICACION_AGENCIA,
+            exitoso=sent_count > 0,
+            request_data=request_payload,
+            response_data={'sent_count': sent_count},
+            error_message=None if sent_count > 0 else 'No se envio ningun correo',
+        )
+        logger.info(
+            "Notificacion enviada para preregistro=%s, agencia=%s, to=%s, cc=%s",
+            preregistro.id,
+            agencia_key,
+            to_emails,
+            cc_emails,
+        )
+    except Exception as exc:
+        logger.error(
+            "Error enviando notificacion de agencia para preregistro=%s: %s",
+            preregistro.id,
+            exc,
+        )
+        LogIntegracion.objects.create(
+            preregistro=preregistro,
+            accion=LogIntegracion.ACCION_NOTIFICACION_AGENCIA,
+            exitoso=False,
+            request_data=request_payload,
+            response_data={},
+            error_message=str(exc),
+        )
 
 
 class IniciarPreRegistroView(APIView):
@@ -969,8 +1085,8 @@ class VerificarLinixView(APIView):
                     datos_oracle=resultado.get('datos_completos')
                 )
                 
-                # Disparar webhook a n8n para notificaciones
-                self._enviar_webhook_n8n(preregistro)
+                # Enviar notificacion directa por correo a la agencia
+                _enviar_notificacion_agencia_email(preregistro, origen='verificar-linix')
                 
                 return Response({
                     'completado': True,
@@ -1126,6 +1242,7 @@ class VerificarLinixPendientesView(APIView):
                     id_tercero=resultado.get('id_tercero'),
                     datos_oracle=resultado.get('datos_completos')
                 )
+                _enviar_notificacion_agencia_email(preregistro, origen='verificar-pendientes')
                 completados.append({
                     'id': preregistro.id,
                     'numero_cedula': preregistro.numero_cedula,

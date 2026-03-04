@@ -53,6 +53,94 @@ LOGGING = {
 }
 
 N8N_WEBHOOK_URL = os.environ.get('N8N_WEBHOOK_URL', '')
+
+# Email / SMTP (notificacion de nuevo asociado)
+EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'django.core.mail.backends.smtp.EmailBackend')
+EMAIL_HOST = os.environ.get('EMAIL_HOST', '')
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', '587'))
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True').lower() == 'true'
+EMAIL_USE_SSL = os.environ.get('EMAIL_USE_SSL', 'False').lower() == 'true'
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'congente.tecnologia@congente.coop')
+
+AGENCIA_NOTIFICACION_DEFAULT_EMAILS = [
+    email.strip()
+    for email in os.environ.get(
+        'AGENCIA_NOTIFICACION_DEFAULT_EMAILS',
+        'congente.tecnologia@congente.coop'
+    ).split(',')
+    if email.strip()
+]
+
+# Modo prueba para notificaciones de agencia:
+# - fuerza una agencia (ej. PRINCIPAL)
+# - permite forzar destinatarios manuales para pruebas controladas
+AGENCIA_NOTIFICACION_FORCE_AGENCIA = os.environ.get(
+    'AGENCIA_NOTIFICACION_FORCE_AGENCIA',
+    ''
+).strip().upper()
+AGENCIA_NOTIFICACION_FORCE_TO = [
+    email.strip()
+    for email in os.environ.get('AGENCIA_NOTIFICACION_FORCE_TO', '').split(',')
+    if email.strip()
+]
+AGENCIA_NOTIFICACION_FORCE_CC = [
+    email.strip()
+    for email in os.environ.get('AGENCIA_NOTIFICACION_FORCE_CC', '').split(',')
+    if email.strip()
+]
+
+AGENCIA_NOTIFICACION_MAP = {
+    'PRINCIPAL': {'to': ['agencia.principal@congente.coop'], 'cc': []},
+    'POPULAR': {'to': ['agencia.popular@congente.coop'], 'cc': []},
+    'MONTECARLO': {'to': ['agencia.montecarlo@congente.coop'], 'cc': []},
+    'PORFIA': {'to': ['agencia.porfia@congente.coop'], 'cc': []},
+    'CATAMA': {'to': ['agencia.catama@congente.coop'], 'cc': []},
+    'ACACIAS': {'to': ['agencia.acacias@congente.coop'], 'cc': []},
+    'GRANADA': {'to': ['agencia.granada@congente.coop'], 'cc': []},
+    'GUAYABETAL': {'to': ['agencia.guayabetal@congente.coop'], 'cc': []},
+    'BARRANCA': {'to': ['agencia.barranca@congente.coop'], 'cc': []},
+    'PUERTO_GAITAN': {'to': ['agencia.puertogaitan@congente.coop'], 'cc': []},
+    'CABUYARO': {'to': ['agencia.cabuyaro@congente.coop'], 'cc': []},
+    'VISTAHERMOSA': {'to': ['agencia.vistahermosa@congente.coop'], 'cc': []},
+    'PUERTO_LOPEZ': {
+        'to': ['ase.comercial-01.puertolopez@congente.coop'],
+        'cc': ['agencia.puertogaitan@congente.coop'],
+    },
+    'EL_CASTILLO': {
+        'to': ['ase.comercial-01.castillo@congente.coop'],
+        'cc': ['agencia.granada@congente.coop'],
+    },
+    'CUMARAL': {
+        'to': ['ase.comercial-01.cumaral@congente.coop'],
+        'cc': ['agencia.catama@congente.coop'],
+    },
+    'LEJANIAS': {
+        'to': ['ase.comercial-01.lejanias@congente.coop'],
+        'cc': ['agencia.granada@congente.coop'],
+    },
+    'MESETAS': {
+        'to': ['ase.comercial-01.mesetas@congente.coop'],
+        'cc': ['agencia.granada@congente.coop'],
+    },
+    'PUERTO_LLERAS': {
+        'to': ['ase.comercial-01.puertolleras@congente.coop'],
+        'cc': ['agencia.granada@congente.coop'],
+    },
+    'URIBE': {
+        'to': ['ase.comercial-01.uribe@congente.coop'],
+        'cc': ['agencia.montecarlo@congente.coop'],
+    },
+    'YOPAL': {
+        'to': ['ase.comercial-01.yopal@congente.coop'],
+        'cc': ['agencia.barranca@congente.coop'],
+    },
+    'VILLANUEVA': {
+        'to': ['ase.comercial-01.villanueva@congente.coop'],
+        'cc': ['agencia.barranca@congente.coop'],
+    },
+}
 DECRIM_ENV = os.environ.get('DECRIM_ENV', 'qa').lower()
 DECRIM_API_URL = os.environ.get(
     'DECRIM_API_URL',
